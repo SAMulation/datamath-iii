@@ -100,26 +100,32 @@ const calculator = {
         // Unless you hit 'minus', then do +/- operation
         if (kp === '-') {
             this.numString = (this.numString === '-') ? '' : '-';
+            // this.currentNum = Number(this.numString);
+            // this.updateScreen(this.currentNum);
         }
+        console.log("operator: " + this.operator);
     },
 
     addition() {
         if (this.numString.length > 0) {
-            this.operator = "+";
-            this.operands[this.currentOperand] = Number(this.numString);
-            console.log(this.operands);
-            if (this.currentOperand === 1) {
-                this.operands[0] = this.operands[0] + this.operands[1];
-                this.operands[1] = 'a';
-                console.log(this.operands);
-                this.numString = '';
-                //this.currentOperand = 0;
-                this.updateScreen(this.operands[0]);
-            } else {
-                this.numString = '';
-                this.currentOperand++;
-                console.log(this.currentOperand);
-            }
+            //this.operator = "+";
+            this.currentNum += this.lastNum;
+            this.updateScreen(this.currentNum);
+            this.lastNum = 'a';
+
+            // console.log(this.operands);
+            // if (this.currentOperand === 1) {
+            //     this.operands[0] = this.operands[0] + this.operands[1];
+            //     this.operands[1] = 'a';
+            //     console.log(this.operands);
+            //     this.numString = '';
+            //     //this.currentOperand = 0;
+            //     this.updateScreen(this.operands[0]);
+            // } else {
+            //     this.numString = '';
+            //     this.currentOperand++;
+            //     console.log(this.currentOperand);
+            // }
         }
     },
 
