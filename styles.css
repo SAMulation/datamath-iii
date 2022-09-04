@@ -2,10 +2,32 @@
     border: 1px solid red;
 } */
 
+* {
+    box-sizing: border-box;
+    font-family: 'Share Tech Mono', sans-serif;
+}
+
+.body {
+    display: flex;
+    justify-content: center;
+}
+
+h1 {
+    font-size: 4em;
+    font-weight: bold;
+    text-align: center;
+}
+
+p.subhead {
+    margin-top: -40px;
+    text-align: center;
+}
+
 .base {
     background-color: rgb(185, 172, 135);
-    margin: 5% 20%;
+    margin: 5% auto;
     padding: 15px;
+    width: 333px;
 }
 
 .pad {
@@ -16,14 +38,19 @@
 
 .screen {
     background-color: rgb(40, 10, 15);
-    margin-bottom: 10px;
+    margin: auto 17px 10px 17px;
     padding: 15px;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(148, 3, 3);
+    text-align: right;
 }
 
 .logo {
     display: flex;
     justify-content: space-between;
     color: white;
+    margin: auto 17px;
 }
 
 .row4 {
@@ -36,10 +63,42 @@
 .row3 {
     display: flex;
     justify-content: center;
-    gap: 30px;
+    gap: 10px;
+    margin: auto 17px;
 }
 
 button {
+    font-family: 'Share Tech Mono', sans-serif;
     min-width: 50px;
     height: 50px;
+    font-size: 40px;
+    background-color: rgb(240, 240, 240);
+}
+
+button:hover {
+    background-color: white;
+}
+
+button.grey:hover {
+    background-color: rgb(223, 223, 223);
+}
+
+button.orange:hover {
+    background-color: rgb(236, 198, 126);
+}
+
+.flexOne {
+    flex: 1;
+}
+
+.flexTwo {
+    flex: 2;
+}
+
+.grey {
+    background-color: rgb(180, 180, 180);
+}
+
+.orange {
+    background-color: rgb(213, 150, 32);
 }
