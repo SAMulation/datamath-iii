@@ -102,3 +102,8 @@ button.orange:hover {
 .orange {
     background-color: rgb(213, 150, 32);
 }
+
+.active-grey {
+    background-color: rgb(255, 255, 255);
+    color: rgb(213, 150, 32);
+}
