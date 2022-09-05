@@ -1,5 +1,10 @@
+/*  STATES EXPLAINED
+    F
+*/
+
 class Calculator {
     constructor(root) {
+        this.state = 0;  // 0 = number, 1 = operator, 2 = special
         this.keyPress = 'a';
         this.currentNum = 'a';
         this.lastNum = 'a';
@@ -8,45 +13,16 @@ class Calculator {
         this.rootElement = root;
 
         this.bindButtons();
-        const buttons = root.querySelectorAll('button');
-        buttons.forEach(button => {
-            button.addEventListener('click', event => {
-                this.setKeyPress(event.target.getAttribute("data-btn"));
-                console.log(event.target.getAttribute('data-btn'));
-                this.handleKeyPress();
-            });
-        })
     }
 
-    // keyPress = 'a';
-    // currentNum: 'a',
-    // lastNum: 'a',  //Necessary?
-    // //operands = [0,0],
-    // //currentOperand: 0,
-    // numString: '',
-    // operator: '',
-    //intString: '',
-    //decString: '',
-    //float: false,
-    //negative: false,
-    //screen: '',
-
-    // getOperand(index) {
-    //     return this.operands[index];
-    // },
-    // getCurrentOperand() {
-    //     return this.operands[this.currentOperand];
-    // },
-    // getFloat() {
-    //     return this.float;
-    // },
-    // getNumString() {
-    //     if (this.float) {
-    //         return Number(this.intString) + "." + Number(this.decString);
-    //     } else {
-    //         return Number(this.intString)
-    //     }
-    // },
+    bindButtons() {
+        const buttons = this.rootElement.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('click', event => {
+                this.handleKeyPress(event.target.getAttribute("data-btn"));
+            });
+        })
+    }   
 
     setKeyPress(key) {
         this.keyPress = key;
@@ -64,8 +40,7 @@ class Calculator {
         this.float = flag;
     }
 
-    handleKeyPress() {
-        const kp = this.keyPress;
+    handleKeyPress(kp) {
         if (!isNaN(kp)) {
             if (this.numString.length < 10) {
                 this.numString += kp.toString();
@@ -91,8 +66,8 @@ class Calculator {
         // } else if (kp === "%") {
         //     calculator.percent();
         // } 
-        } else if (kp === "B") {
-            calculator.backspace();
+        } else if (kp === "N") {
+            calculator.negate();
         } else if (kp === "C") {
             calculator.clear();
         }
