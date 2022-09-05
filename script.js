@@ -57,7 +57,7 @@ class Calculator {
                 mouseDownDone = true;
                 //console.log("Clear");
                 this.clearScreen();
-              }, 1000);
+              }, 500);
         });
 
         clear.addEventListener('click', event => {
@@ -80,6 +80,10 @@ class Calculator {
 
     getState() {
         return this.state.options[this.state.index];
+    }
+
+    getStateIndex() {
+        return this.state.index;
     }
 
     getCurrentNum() {
@@ -148,7 +152,7 @@ class Calculator {
     }
 
     numberInput(kp) {
-        let state = this.getState();
+        let state = this.getStateIndex();
 
         if (this.getCurrentNum() === 'a') {
             this.setCurrentNum('');
@@ -221,6 +225,9 @@ class Calculator {
             }
             let string = this.getCurrentNum();
             string = string.slice(0,-1);
+            if (string === '') {
+                string = 'a';
+            }
             //console.log(string);
             this.setCurrentNum(string);
             this.updateScreen();
