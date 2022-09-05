@@ -1,11 +1,18 @@
-const calculator = {
-    keyPress: 'a',
-    currentNum: 'a',
-    lastNum: 'a',  //Necessary?
-    //operands = [0,0],
-    //currentOperand: 0,
-    numString: '',
-    operator: '',
+class Calculator {
+    constructor() {
+        this.keyPress = 'a';
+        this.currentNum = 'a';
+        this.lastNum = 'a';
+        this.numString = '';
+        this.operator = '';
+    }
+    // keyPress = 'a';
+    // currentNum: 'a',
+    // lastNum: 'a',  //Necessary?
+    // //operands = [0,0],
+    // //currentOperand: 0,
+    // numString: '',
+    // operator: '',
     //intString: '',
     //decString: '',
     //float: false,
@@ -56,6 +63,8 @@ const calculator = {
                 console.log("currentNum: " + this.currentNum);
                 console.log("numString: " + this.numString);
             }
+        } else if (kp === "=") {
+            calculator.evaluate(this.operator);
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
             this.handleOperator(kp);    
         
@@ -74,8 +83,6 @@ const calculator = {
             calculator.backspace();
         } else if (kp === "C") {
             calculator.clear();
-        } else if (kp === "=") {
-            calculator.evaluate();
         }
     },
 
@@ -94,6 +101,8 @@ const calculator = {
             if (this.operator === '' || this.operator !== kp) {
                 this.operator = kp;
             }
+            this.lastNum = this.currentNum;
+            //this.numString = '';
         } 
 
         // No numbers assigned, don't assign operator
@@ -106,12 +115,23 @@ const calculator = {
         console.log("operator: " + this.operator);
     },
 
+    evaluate(op) {
+        if (op === "+") {
+            this.addition();            
+        }
+    },
+
     addition() {
         if (this.numString.length > 0) {
             //this.operator = "+";
+            this.numString = '';
+            console.log("numString: " + this.numString);
+            console.log("currentNum")
             this.currentNum += this.lastNum;
             this.updateScreen(this.currentNum);
             this.lastNum = 'a';
+            this.currentNum = 'a';
+            this.operator = '';
 
             // console.log(this.operands);
             // if (this.currentOperand === 1) {
@@ -167,7 +187,6 @@ const calculator = {
 buttons = document.querySelectorAll('button');
 buttons.forEach(button => {
     button.addEventListener('click', event => {
-        // 👇️ {bar: 'foo'}
         calculator.setKeyPress(event.target.getAttribute("data-btn"));
         console.log(event.target.getAttribute('data-btn'));
         calculator.handleKeyPress();
