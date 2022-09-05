@@ -1,15 +1,34 @@
 /*  STATES EXPLAINED
-    F
+    1: 'start' = calc just opened // [C] = N, [L] = N, [O] = N
+        legal: 0-9 (adding to C), no operators b/c no # stored
+    2: 'one-no-op' = first number entered, no operator // [C] = X, [L] = N, [O] = N
+        legal: 0-9 (adding to C), op (=, +,-,*,/,%) (clear lastOp) // = straight to post AND check for lastOp (to repeat)
+    3: 'next', 'one-op' = first num in, op in, expected next number // [C] = X, [L] = N, [O] = X
+        action: move C to L, clear C; fill op
+        legal 0-9 (adding to C), ** %,+/- acts on L **, = evals L, op (+,-,*,/) just switches
+    4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
+        legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one-no-op'
+    5: 'post' = evaluation occuring // [C] = N, [L] = X, [O] = N
+        action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
+
+    always: . on C (if blank then '0.' else append '.')
+    except 'start': CLR yes (else N)
+    unless 'start' or 'next': +/- on C (else on L), BS on C (else N), % on C (else on L)
 */
+
 
 class Calculator {
     constructor(root) {
-        this.state = 0;  // 0 = number, 1 = operator, 2 = special
+        this.state = {
+            options: ['start', 'one', 'next', 'full', 'post'],
+            index: 0
+        }
         this.keyPress = 'a';
         this.currentNum = 'a';
         this.lastNum = 'a';
         this.numString = '';
         this.operator = '';
+        this.lastOperator = '';
         this.rootElement = root;
 
         this.bindButtons();
@@ -24,6 +43,14 @@ class Calculator {
         })
     }   
 
+    getState() {
+        return this.state.options[this.state.index];
+    }
+
+    setState(idx) {
+        this.state.index = idx;
+    }
+    
     setKeyPress(key) {
         this.keyPress = key;
     }
@@ -176,4 +203,4 @@ class Calculator {
   
 
 const calculator1 = new Calculator(document.querySelector('.calc1'));
-const calculator2 = new Calculator(document.querySelector('.calc2'));
+// const calculator2 = new Calculator(document.querySelector('.calc2'));
