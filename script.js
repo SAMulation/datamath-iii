@@ -24,10 +24,8 @@ class Calculator {
             options: ['start', 'one', 'op', 'next', 'full', 'post'],
             index: 0
         }
-        this.keyPress = 'a';
         this.currentNum = 'a';
         this.lastNum = 'a';
-        this.numString = '';
         this.operator = '';
         this.lastOperator = '';
         this.rootElement = root;
@@ -36,31 +34,96 @@ class Calculator {
     }
 
     bindButtons() {
-        const buttons = this.rootElement.querySelectorAll('button');
+        const buttons = this.rootElement.querySelectorAll('button:not(#clear)');
+        // Clear press or press and hold
+        const clear = this.rootElement.querySelector('#clear');
+
         buttons.forEach(button => {
             button.addEventListener('click', event => {
+                console.log('click');
                 this.handleKeyPress(event.target.getAttribute("data-btn"));
             });
         })
+        
+        let value = 0,
+        //hold_time = 1000,
+        mouseHoldTimeout,
+        mouseDownDone = false,
+        clearScreen = false;
+
+        clear.addEventListener('mousedown', event => {
+            mouseHoldTimeout = setTimeout(() => {
+                value++;
+                mouseDownDone = true;
+                //console.log("Clear");
+                this.clearScreen();
+              }, 1000);
+        });
+
+        clear.addEventListener('click', event => {
+            if (mouseHoldTimeout) {
+              clearTimeout(mouseHoldTimeout);
+              mouseHoldTimeout = null;
+              //console.log("first");
+              this.backspace()
+            }
+            if (mouseDownDone) {
+              mouseDownDone = false;
+              //console.log("Backspace");
+              //this.backspace()
+              return;
+            }
+            value += 15;
+            //console.log("end");
+        });
     }   
 
     getState() {
         return this.state.options[this.state.index];
     }
 
+    getCurrentNum() {
+        return this.currentNum;
+    }
+
+    getLastNum() {
+        return this.lastNum;
+    }
+
+    getOperator() {
+        return this.operator;
+    }
+
+    getLastOperator() {
+        return this.lastOperator;
+    }
+
     setState(idx) {
         this.state.index = idx;
     }
 
+    setCurrentNum(num) {
+        this.currentNum = num;
+    }
+
+    setLastNum(num) {
+        this.lastNum = num;
+    }
+
+    setOperator(num) {
+        this.operator = num;
+    }
+
+    setLastOperator(num) {
+        this.lastOperator = num;
+    }
+
     handleKeyPress(kp) {
         if (!isNaN(kp)) {
-            if (this.numString.length < 10) {
-                this.numString += kp.toString();
-                //this.screen = this.numString;
-                this.updateScreen(this.numString);
-                this.currentNum = Number(this.numString);
-                console.log("currentNum: " + this.currentNum);
-                console.log("numString: " + this.numString);
+            if (this.currentNum.length < 10) {
+                this.setCurrentNum(this.getCurrentNum() + kp.toString());
+                this.updateScreen();
+                console.log("currentNum: " + this.getCurrentNum());
             }
         } else if (kp === "=") {
             calculator.evaluate(this.operator);
@@ -79,9 +142,10 @@ class Calculator {
         //     calculator.percent();
         // } 
         } else if (kp === "N") {
-            calculator.negate();
+            //calculator.negate();
         } else if (kp === "C") {
-            calculator.clear();
+            console.log('we made it');
+            //calculator.clear();
         }
     }
 
@@ -116,6 +180,35 @@ class Calculator {
             // this.updateScreen(this.currentNum);
         }
         console.log("operator: " + this.operator);
+    }
+
+
+    clearScreen() {
+        if (this.getState()) {
+            this.setState(0);
+            this.setCurrentNum('a');
+            this.setLastNum('a');
+            this.setOperator('');
+            this.setLastOperator('');
+            this.updateScreen();
+        }
+    }
+
+    backspace() {
+        //console.log(this.getState());
+        if (this.getState() !== 'start') {  // Not on start
+            if(this.getState() === 'next') {  //On last, clear operator
+                this.setOperator('');
+                this.setCurrentNum(this.getLastNum());
+                this.setLastNum('a');
+                this.setState(1);
+            }
+            let string = this.getCurrentNum();
+            string = string.slice(0,-1);
+            //console.log(string);
+            this.setCurrentNum(string);
+            this.updateScreen();
+        }
     }
 
     evaluate(op) {
@@ -174,8 +267,9 @@ class Calculator {
         }
     }
 
-    updateScreen(num) {
-        this.rootElement.querySelector('.screen').textContent = num;
+    updateScreen() {
+        const displayText = (this.getCurrentNum() === 'a') ? "Let's math!" : this.getCurrentNum();
+        this.rootElement.querySelector('.screen').textContent = displayText;
     }
     resetOperands() {
         this.operands = ['a', 'a'];
