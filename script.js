@@ -1,14 +1,15 @@
 /*  STATES EXPLAINED
-    1: 'start' = calc just opened // [C] = N, [L] = N, [O] = N
+    0: 'start' = calc just opened // [C] = N, [L] = N, [O] = N
         legal: 0-9 (adding to C), no operators b/c no # stored
-    2: 'one-no-op' = first number entered, no operator // [C] = X, [L] = N, [O] = N
+    1: 'one' = first number entered, no operator // [C] = X, [L] = N, [O] = N
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) (clear lastOp) // = straight to post AND check for lastOp (to repeat)
-    3: 'next', 'one-op' = first num in, op in, expected next number // [C] = X, [L] = N, [O] = X
+    2: 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X
+    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X
         action: move C to L, clear C; fill op
         legal 0-9 (adding to C), ** %,+/- acts on L **, = evals L, op (+,-,*,/) just switches
     4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one-no-op'
-    5: 'post' = evaluation occuring // [C] = N, [L] = X, [O] = N
+    5: 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
         action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
 
     always: . on C (if blank then '0.' else append '.')
@@ -20,7 +21,7 @@
 class Calculator {
     constructor(root) {
         this.state = {
-            options: ['start', 'one', 'next', 'full', 'post'],
+            options: ['start', 'one', 'op', 'next', 'full', 'post'],
             index: 0
         }
         this.keyPress = 'a';
@@ -50,7 +51,7 @@ class Calculator {
     setState(idx) {
         this.state.index = idx;
     }
-    
+
     handleKeyPress(kp) {
         if (!isNaN(kp)) {
             if (this.numString.length < 10) {
