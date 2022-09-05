@@ -130,24 +130,11 @@ class Calculator {
         } else if (kp === "=") {
             calculator.evaluate(this.operator);
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
-            this.handleOperator(kp);    
-        
-        // else if (kp === "+") {
-        //     calculator.addition();
-        // } else if (kp === "-") {
-        //     calculator.subtraction();
-        // } else if (kp === "*") {
-        //     calculator.multiplication();
-        // } else if (kp === "÷") {
-        //     calculator.division();
-        // } else if (kp === "%") {
-        //     calculator.percent();
-        // } 
+            this.handleOperator(kp);   
+        } else if (kp === '%') {
+            this.percent();
         } else if (kp === "N") {
-            //calculator.negate();
-        } else if (kp === "C") {
-            console.log('we made it');
-            //calculator.clear();
+            this.negate();
         }
     }
 
