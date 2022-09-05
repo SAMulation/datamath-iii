@@ -129,7 +129,7 @@ class Calculator {
                 this.setState(this.numberInput(kp));
             }
         } else if (kp === "=") {
-            calculator.evaluate(this.operator);
+            this.evaluate((this.getState() === 'next') ? this.getOperator() : "=");
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
             this.handleOperator(kp);   
         } else if (kp === '%') {
@@ -146,8 +146,9 @@ class Calculator {
             this.setCurrentNum('');
         }
         this.setCurrentNum(this.getCurrentNum() + kp.toString());
-        this.updateScreen();
+        this.updateScreen(this.getCurrentNum());
         console.log("currentNum: " + this.getCurrentNum());
+        console.log("LastNum: " + this.getLastNum());
         
         if (state === 0) {
             state = 1;            
@@ -164,8 +165,11 @@ class Calculator {
         } else if (state === 'next') {
             this.setOperator(kp);
         } else if (state === 'one') {
-            this.setCurrentNum(this.getLastNum());
-            this.evaluate(kp);
+            this.setState(2);
+            this.setLastNum(Number(this.getCurrentNum()));
+            this.setCurrentNum('a');
+            this.setOperator(kp);
+            this.setState(3);
         }
     }
 
@@ -230,11 +234,20 @@ class Calculator {
             }
             //console.log(string);
             this.setCurrentNum(string);
-            this.updateScreen();
+            this.updateScreen(this.getCurrentNum());
         }
     }
 
-    evaluate(op) {
+    evaluate(op = "=") {
+        if (op === "=") {
+            op = this.getOperator();
+        }
+
+        // Edge case of equals hit after hitting operator
+        if (this.getState === 'next') {
+            this.setCurrentNum(this.getLastNum);
+        }
+
         if (op === '+') {
             this.addition();
         } else if (op === '-') {
@@ -244,34 +257,21 @@ class Calculator {
         } else {  // Division
             this.division();
         }
+
+        //this.resetOperator();
+    }
+
+    resetOperator() {
+        this.updateScreen(this.getLastNum());
+        this.setCurrentNum('a');
+        this.setLastOperator(this.getOperator());
+        this.setOperator('');
+        this.setState(1);
     }
 
     addition() {
-        if (this.numString.length > 0) {
-            //this.operator = "+";
-            this.numString = '';
-            console.log("numString: " + this.numString);
-            console.log("currentNum")
-            this.currentNum += this.lastNum;
-            this.updateScreen(this.currentNum);
-            this.lastNum = 'a';
-            this.currentNum = 'a';
-            this.operator = '';
-
-            // console.log(this.operands);
-            // if (this.currentOperand === 1) {
-            //     this.operands[0] = this.operands[0] + this.operands[1];
-            //     this.operands[1] = 'a';
-            //     console.log(this.operands);
-            //     this.numString = '';
-            //     //this.currentOperand = 0;
-            //     this.updateScreen(this.operands[0]);
-            // } else {
-            //     this.numString = '';
-            //     this.currentOperand++;
-            //     console.log(this.currentOperand);
-            // }
-        }
+        this.setLastNum(Number(this.getCurrentNum()) + Number(this.getLastNum()));
+        this.resetOperator();
     }
 
     subtraction() {
@@ -296,8 +296,7 @@ class Calculator {
         }
     }
 
-    updateScreen() {
-        const displayText = (this.getCurrentNum() === 'a') ? "Let's math!" : this.getCurrentNum();
+    updateScreen(displayText = "Let's math!") {
         this.rootElement.querySelector('.screen').textContent = displayText;
     }
     resetOperands() {
