@@ -3,7 +3,7 @@
         legal: 0-9 (adding to C), no operators b/c no # stored
     1: 'one' = first number entered, no operator // [C] = X, [L] = N, [O] = N
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) (clear lastOp) // = straight to post AND check for lastOp (to repeat)
-    2: 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X
+    2: 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
     3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X
         action: move C to L, clear C; fill op
         legal 0-9 (adding to C), ** %,+/- acts on L **, = evals L, op (+,-,*,/) just switches
@@ -121,9 +121,7 @@ class Calculator {
     handleKeyPress(kp) {
         if (!isNaN(kp)) {
             if (this.currentNum.length < 10) {
-                this.setCurrentNum(this.getCurrentNum() + kp.toString());
-                this.updateScreen();
-                console.log("currentNum: " + this.getCurrentNum());
+                this.setState(this.numberInput(kp));
             }
         } else if (kp === "=") {
             calculator.evaluate(this.operator);
@@ -147,6 +145,24 @@ class Calculator {
             console.log('we made it');
             //calculator.clear();
         }
+    }
+
+    numberInput(kp) {
+        let state = this.getState();
+
+        if (this.getCurrentNum() === 'a') {
+            this.setCurrentNum('');
+        }
+        this.setCurrentNum(this.getCurrentNum() + kp.toString());
+        this.updateScreen();
+        console.log("currentNum: " + this.getCurrentNum());
+        
+        if (state === 0) {
+            state = 1;            
+        } else if (state == 3) {
+            state = 4;
+        }
+        return state;
     }
 
     handleOperator(kp) {
