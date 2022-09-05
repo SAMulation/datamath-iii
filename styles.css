@@ -23,7 +23,7 @@ p.subhead {
     text-align: center;
 }
 
-.base {
+.calc1, .calc2 {
     background-color: rgb(185, 172, 135);
     margin: 5% auto;
     padding: 15px;
