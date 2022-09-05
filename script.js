@@ -11,6 +11,7 @@
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one-no-op'
     5: 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
         action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
+    6: 'error' = DIV/0 or overflow errors
 
     always: . on C (if blank then '0.' else append '.')
     except 'start': CLR yes (else N)
@@ -157,37 +158,49 @@ class Calculator {
     }
 
     handleOperator(kp) {
-        // operator, currentNum, and lastNum assigned and ready for next operator
-        if (this.lastNum !== 'a') {
-            // So, evaluate
-            this.evaluate(this.operator);
+        const state = this.getState();
+        if (state === 'full') {
+            this.evaluate(kp);
+        } else if (state === 'next') {
+            this.setOperator(kp);
+        } else if (state === 'one') {
+            this.setCurrentNum(this.getLastNum());
+            this.evaluate(kp);
         }
-
-        // Only one number assigned
-        if (this.currentNum !== 'a') {
-            // No operator assigned (Just got done evaluating or just one number so far)
-            // OR, operator assigned but different one was pressed
-            // Either way, just assign this one
-            if (this.operator !== kp) {
-                if (this.operator === '') {
-                    this.lastNum = this.currentNum;
-                    this.numString = '';
-                }
-
-                this.operator = kp;
-            }
-
-        } 
-
-        // No numbers assigned, don't assign operator
-        // Unless you hit 'minus', then do +/- operation
-        if (kp === '-') {
-            this.numString = (this.numString === '-') ? '' : '-';
-            // this.currentNum = Number(this.numString);
-            // this.updateScreen(this.currentNum);
-        }
-        console.log("operator: " + this.operator);
     }
+
+
+        // // operator, currentNum, and lastNum assigned and ready for next operator
+        // if (this.lastNum !== 'a') {
+        //     // So, evaluate
+        //     this.evaluate(this.operator);
+        // }
+
+        // // Only one number assigned
+        // if (this.currentNum !== 'a') {
+        //     // No operator assigned (Just got done evaluating or just one number so far)
+        //     // OR, operator assigned but different one was pressed
+        //     // Either way, just assign this one
+        //     if (this.operator !== kp) {
+        //         if (this.operator === '') {
+        //             this.lastNum = this.currentNum;
+        //             this.numString = '';
+        //         }
+
+        //         this.operator = kp;
+        //     }
+
+        // } 
+
+        // // No numbers assigned, don't assign operator
+        // // Unless you hit 'minus', then do +/- operation
+        // if (kp === '-') {
+        //     this.numString = (this.numString === '-') ? '' : '-';
+        //     // this.currentNum = Number(this.numString);
+        //     // this.updateScreen(this.currentNum);
+        // }
+        // console.log("operator: " + this.operator);
+    
 
 
     clearScreen() {
@@ -222,8 +235,14 @@ class Calculator {
     }
 
     evaluate(op) {
-        if (op === "+") {
-            this.addition();            
+        if (op === '+') {
+            this.addition();
+        } else if (op === '-') {
+            this.subtraction();
+        } else if (op === '*') {
+            this.multiplication();
+        } else {  // Division
+            this.division();
         }
     }
 
