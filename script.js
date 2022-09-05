@@ -1,11 +1,23 @@
 class Calculator {
-    constructor() {
+    constructor(root) {
         this.keyPress = 'a';
         this.currentNum = 'a';
         this.lastNum = 'a';
         this.numString = '';
         this.operator = '';
+        this.rootElement = root;
+
+        this.bindButtons();
+        const buttons = root.querySelectorAll('button');
+        buttons.forEach(button => {
+            button.addEventListener('click', event => {
+                this.setKeyPress(event.target.getAttribute("data-btn"));
+                console.log(event.target.getAttribute('data-btn'));
+                this.handleKeyPress();
+            });
+        })
     }
+
     // keyPress = 'a';
     // currentNum: 'a',
     // lastNum: 'a',  //Necessary?
@@ -38,19 +50,19 @@ class Calculator {
 
     setKeyPress(key) {
         this.keyPress = key;
-    },
+    }
     setOperand1(num) {
         this.operand1 = num;
-    },
+    }
     setOperand2(num) {
         this.operand2 = num;
-    },
+    }
     setOperator(option) {
         this.operator = option;
-    },
+    }
     setFloat(flag) {
         this.float = flag;
-    },
+    }
 
     handleKeyPress() {
         const kp = this.keyPress;
@@ -84,7 +96,7 @@ class Calculator {
         } else if (kp === "C") {
             calculator.clear();
         }
-    },
+    }
 
     handleOperator(kp) {
         // operator, currentNum, and lastNum assigned and ready for next operator
@@ -98,11 +110,15 @@ class Calculator {
             // No operator assigned (Just got done evaluating or just one number so far)
             // OR, operator assigned but different one was pressed
             // Either way, just assign this one
-            if (this.operator === '' || this.operator !== kp) {
+            if (this.operator !== kp) {
+                if (this.operator === '') {
+                    this.lastNum = this.currentNum;
+                    this.numString = '';
+                }
+
                 this.operator = kp;
             }
-            this.lastNum = this.currentNum;
-            //this.numString = '';
+
         } 
 
         // No numbers assigned, don't assign operator
@@ -113,13 +129,13 @@ class Calculator {
             // this.updateScreen(this.currentNum);
         }
         console.log("operator: " + this.operator);
-    },
+    }
 
     evaluate(op) {
         if (op === "+") {
             this.addition();            
         }
-    },
+    }
 
     addition() {
         if (this.numString.length > 0) {
@@ -147,7 +163,7 @@ class Calculator {
             //     console.log(this.currentOperand);
             // }
         }
-    },
+    }
 
     subtraction() {
         if (this.numString.length === 0) { // Allows for negatives
@@ -169,11 +185,11 @@ class Calculator {
                 console.log(this.currentOperand);
             }
         }
-    },
+    }
 
     updateScreen(num) {
-        document.querySelector('.screen').textContent = num;
-    },
+        this.rootElement.querySelector('.screen').textContent = num;
+    }
     resetOperands() {
         this.operands = ['a', 'a'];
         this.currentOperand = 0;
@@ -184,11 +200,5 @@ class Calculator {
   
   
 
-buttons = document.querySelectorAll('button');
-buttons.forEach(button => {
-    button.addEventListener('click', event => {
-        calculator.setKeyPress(event.target.getAttribute("data-btn"));
-        console.log(event.target.getAttribute('data-btn'));
-        calculator.handleKeyPress();
-    });
-})
+const calculator1 = new Calculator(document.querySelector('.calc1'));
+const calculator2 = new Calculator(document.querySelector('.calc2'));
