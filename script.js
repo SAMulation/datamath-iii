@@ -51,22 +51,6 @@ class Calculator {
         this.state.index = idx;
     }
     
-    setKeyPress(key) {
-        this.keyPress = key;
-    }
-    setOperand1(num) {
-        this.operand1 = num;
-    }
-    setOperand2(num) {
-        this.operand2 = num;
-    }
-    setOperator(option) {
-        this.operator = option;
-    }
-    setFloat(flag) {
-        this.float = flag;
-    }
-
     handleKeyPress(kp) {
         if (!isNaN(kp)) {
             if (this.numString.length < 10) {
