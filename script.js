@@ -153,6 +153,11 @@ class Calculator {
     numberInput(kp) {
         let state = this.getStateIndex();
 
+        // Stop looking for post-eval operator
+        if (state === 1 && this.getLastOperator()) {
+            this.resetLastOperator();
+        }
+
         if (this.getCurrentNum() === 'a') {
             this.setCurrentNum('');
         }
@@ -169,6 +174,11 @@ class Calculator {
         return state;
     }
 
+    resetLastOperator() {
+        this.setLastOperator('');
+        this.setLastOpNum('a');
+    }
+
     handleOperator(kp) {
         const state = this.getState();
         if (state === 'full') {
@@ -177,9 +187,17 @@ class Calculator {
             this.setOperator(kp);
         } else if (state === 'one') {
             this.setState(2);
-            this.setLastNum(Number(this.getCurrentNum()));
-            this.setCurrentNum('a');
-            this.setOperator(kp);
+
+            // Trying to do an operation on an answer
+            if (this.getLastOperator() !== '') {
+                this.setOperator(this.getLastOperator());
+            } else {
+                this.setLastNum(Number(this.getCurrentNum()));
+                this.setCurrentNum('a');
+                this.setOperator(kp);
+            }
+
+            this.resetLastOperator();
             this.setState(3);
         }
     }
@@ -224,8 +242,7 @@ class Calculator {
             this.setCurrentNum('a');
             this.setLastNum('a');
             this.setOperator('');
-            this.setLastOperator('');
-            this.setLastOpNum('a');
+            this.resetLastOperator();
             this.updateScreen();
         }
     }
@@ -251,12 +268,15 @@ class Calculator {
     }
 
     evaluate(op = "=") {
+        
         // Edge case of hitting equals multiple times
         if (this.getState() === 'one' && this.getLastOperator()) {
             op = this.getLastOperator();
-            this.setCurrentNum(this.getLastOpNum);
+            this.setOperator(op);
+            this.setCurrentNum(this.getLastOpNum());
+            this.setState(4);
         }
-        
+
         if (op === "=") {
             op = this.getOperator();
         }
@@ -266,6 +286,7 @@ class Calculator {
             this.setCurrentNum(this.getLastNum());
         }
 
+        //this.setState(5);
         if (op === '+') {
             this.addition();
         } else if (op === '-') {
