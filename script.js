@@ -1,15 +1,19 @@
 /*  STATES EXPLAINED
-    0: 'start' = calc just opened // [C] = N, [L] = N, [O] = N
-        legal: 0-9 (adding to C), no operators b/c no # stored
-    1: 'one' = first number entered, no operator // [C] = X, [L] = N, [O] = N
-        legal: 0-9 (adding to C), op (=, +,-,*,/,%) (clear lastOp) // = straight to post AND check for lastOp (to repeat)
-    2: 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
-    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X
+    0: 'start' = calc just opened // [C] = N, [L] = N, [O] = N, [LO] = N
+        legal: 0-9 (adding to C) go to 'nolast', no operators b/c no # stored; =, (-): does nothing
+    2: 'nolast' = typing in current, no last yet // [C] = x, [L] = N, [O] = N, [LO] = N
+        legal: 0-9 (adding to C/keep adding to C) stay at this, op (+,-,*,/) record op and go to 'next'; = does nothing; % acts on C
+    1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
+        legal: 0-9 (adding to C then go to 'nolast'), op (=, +,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
+    1.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
+
+    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
-        legal 0-9 (adding to C), ** %,+/- acts on L **, = evals L, op (+,-,*,/) just switches
+        legal 0-9 (adding to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
+    3.5: 'nexty' = same as above, but C is not blank // [C] = x // % short circuits
     4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
-        legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one-no-op'
-    5: 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
+        legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one' (which has LastOperation)
+    5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
         action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
     6: 'error' = DIV/0 or overflow errors
 
@@ -38,9 +42,9 @@ class Calculator {
     }
 
     bindButtons() {
-        const buttons = this.rootElement.querySelectorAll('button:not(#clear)');
         // Clear press or press and hold
         const clear = this.rootElement.querySelector('#clear');
+        const buttons = this.rootElement.querySelectorAll('button:not(#clear)');
 
         buttons.forEach(button => {
             button.addEventListener('click', event => {
@@ -50,10 +54,8 @@ class Calculator {
         })
         
         let value = 0,
-        //hold_time = 1000,
         mouseHoldTimeout,
-        mouseDownDone = false,
-        clearScreen = false;
+        mouseDownDone = false;
 
         clear.addEventListener('mousedown', event => {
             mouseHoldTimeout = setTimeout(() => {
@@ -68,17 +70,13 @@ class Calculator {
             if (mouseHoldTimeout) {
               clearTimeout(mouseHoldTimeout);
               mouseHoldTimeout = null;
-              //console.log("first");
               this.backspace()
             }
             if (mouseDownDone) {
               mouseDownDone = false;
-              //console.log("Backspace");
-              //this.backspace()
               return;
             }
             value += 15;
-            //console.log("end");
         });
 
         // Key Press Handling
@@ -180,7 +178,9 @@ class Calculator {
     }
 
     handleKeyPress(kp) {
+        // Numbers
         if (!isNaN(kp)) {
+            // Max length of 10 for currentNum (may change that later)
             if (this.currentNum.length < 10) {
                 this.setState(this.numberInput(kp));
                 // HERE: Making sure BS works but not on answers
@@ -189,7 +189,9 @@ class Calculator {
                     this.resetLastOperator();
                 }
             }
+        // Decimal
         } else if (kp === '.') {
+            // Don't add a decimal if it's already there
             if (!(this.getCurrentNum().includes('.'))) {
                 this.setCurrentNum((this.getCurrentNum() === 'a') ? '0.' : this.getCurrentNum() + ".");
                 this.updateScreen(this.getCurrentNum());
