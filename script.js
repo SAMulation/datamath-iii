@@ -139,6 +139,11 @@ class Calculator {
             if (this.currentNum.length < 10) {
                 this.setState(this.numberInput(kp));
             }
+        } else if (kp === '.') {
+            if (!(this.getCurrentNum().includes('.'))) {
+                this.setCurrentNum((this.getCurrentNum() === 'a') ? '0.' : this.getCurrentNum() + ".");
+                this.updateScreen(this.getCurrentNum());
+            }
         } else if (kp === "=") {
             this.evaluate((this.getState() === 'next') ? this.getOperator() : "=");
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
@@ -148,6 +153,10 @@ class Calculator {
         } else if (kp === "N") {
             this.negate();
         }
+    }
+
+    negate() {
+        // This is where we leave off
     }
 
     numberInput(kp) {
@@ -337,8 +346,12 @@ class Calculator {
     }
 
     updateScreen(displayText = "Let's math!") {
+        if (!isNaN(displayText) && displayText.toString().includes('.')) {
+            displayText = Math.floor(displayText * 10000000000) / 10000000000;
+        }
         this.rootElement.querySelector('.screen').textContent = displayText;
     }
+
     resetOperands() {
         this.operands = ['a', 'a'];
         this.currentOperand = 0;
