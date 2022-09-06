@@ -80,6 +80,51 @@ class Calculator {
             value += 15;
             //console.log("end");
         });
+
+        // Key Press Handling
+        window.addEventListener('keydown', event => {
+            if (event.defaultPrevented) {
+                return; // Do nothing if the event was already processed
+            }
+            console.log(event.key)
+            switch (event.key) {
+                case "0":
+                case "1":
+                case "2": 
+                case "3":
+                case "4":
+                case "5":
+                case "6":
+                case "7":
+                case "8": 
+                case "9":
+                case "+":    
+                case "-":    
+                case "*":
+                case "/":
+                case "%":
+                case ".":
+                    this.handleKeyPress(event.key);
+                    break;
+                case "Backspace":
+                    this.handleKeyPress('B');
+                    break;
+                case "Escape":
+                    this.handleKeyPress('C');
+                    break;
+                case "_":
+                    this.handleKeyPress('N');
+                    break;
+                case "Enter":
+                    this.handleKeyPress('=');
+                    break;
+                default:
+                    return; // Quit when this doesn't handle the key event.
+            }
+          
+            // Cancel the default action to avoid it being handled twice
+            event.preventDefault();
+          }, true);
     }   
 
     getState() {
@@ -138,6 +183,11 @@ class Calculator {
         if (!isNaN(kp)) {
             if (this.currentNum.length < 10) {
                 this.setState(this.numberInput(kp));
+                // HERE: Making sure BS works but not on answers
+                //       and can't bring up 'a'
+                if (this.getLastOperator() !== '') {
+                    this.resetLastOperator();
+                }
             }
         } else if (kp === '.') {
             if (!(this.getCurrentNum().includes('.'))) {
@@ -152,6 +202,10 @@ class Calculator {
             this.percent();
         } else if (kp === "N") {
             this.negate();
+        } else if (kp === 'B') {
+            this.backspace();
+        } else if (kp === 'C') {
+            this.clearScreen();
         }
     }
 
@@ -276,7 +330,10 @@ class Calculator {
 
     backspace() {
         //console.log(this.getState());
-        if (this.getState() !== 'start') {  // Not on start
+        // Not on start or after an answer
+        // HERE: This still needs to be reworked
+        //       Also, prevent BS to 'a'
+        if (this.getState() !== 'start' && !(this.getState() === 'one' && this.getLastOperator !== '')) {  
             if(this.getState() === 'next') {  //On last, clear operator
                 this.setOperator('');
                 this.setCurrentNum(this.getLastNum());
@@ -344,25 +401,11 @@ class Calculator {
     subtraction() {
         this.setLastNum(Number(this.getCurrentNum()) - Number(this.getLastNum()));
         this.resetOperator();
-        // if (this.numString.length === 0) { // Allows for negatives
-        //     this.numString = "-";
-        // } else {
-        //     this.operator = "-";
-        //     this.operands[this.currentOperand] = Number(this.numString);
-        //     console.log(this.operands);
-        //     if (this.currentOperand === 1) {
-        //         this.operands[0] = this.operands[0] - this.operands[1];
-        //         this.operands[1] = 'a';
-        //         console.log(this.operands);
-        //         this.numString = '';
-        //         //this.currentOperand = 0;
-        //         this.updateScreen(this.operands[0]);
-        //     } else {
-        //         this.numString = '';
-        //         this.currentOperand++;
-        //         console.log(this.currentOperand);
-        //     }
-        // }
+    }
+
+    percent() {
+        this.setLastNum(Number(this.getCurrentNum()) / 100);
+        this.resetOperator();
     }
 
     multiplication() {
