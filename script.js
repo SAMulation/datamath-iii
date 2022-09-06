@@ -342,25 +342,37 @@ class Calculator {
     }
 
     subtraction() {
-        if (this.numString.length === 0) { // Allows for negatives
-            this.numString = "-";
-        } else {
-            this.operator = "-";
-            this.operands[this.currentOperand] = Number(this.numString);
-            console.log(this.operands);
-            if (this.currentOperand === 1) {
-                this.operands[0] = this.operands[0] - this.operands[1];
-                this.operands[1] = 'a';
-                console.log(this.operands);
-                this.numString = '';
-                //this.currentOperand = 0;
-                this.updateScreen(this.operands[0]);
-            } else {
-                this.numString = '';
-                this.currentOperand++;
-                console.log(this.currentOperand);
-            }
-        }
+        this.setLastNum(Number(this.getCurrentNum()) - Number(this.getLastNum()));
+        this.resetOperator();
+        // if (this.numString.length === 0) { // Allows for negatives
+        //     this.numString = "-";
+        // } else {
+        //     this.operator = "-";
+        //     this.operands[this.currentOperand] = Number(this.numString);
+        //     console.log(this.operands);
+        //     if (this.currentOperand === 1) {
+        //         this.operands[0] = this.operands[0] - this.operands[1];
+        //         this.operands[1] = 'a';
+        //         console.log(this.operands);
+        //         this.numString = '';
+        //         //this.currentOperand = 0;
+        //         this.updateScreen(this.operands[0]);
+        //     } else {
+        //         this.numString = '';
+        //         this.currentOperand++;
+        //         console.log(this.currentOperand);
+        //     }
+        // }
+    }
+
+    multiplication() {
+        this.setLastNum(Number(this.getCurrentNum()) * Number(this.getLastNum()));
+        this.resetOperator();
+    }
+
+    division() {
+        this.setLastNum(Number(this.getCurrentNum()) / Number(this.getLastNum()));
+        this.resetOperator();
     }
 
     updateScreen(displayText = "Let's math!") {
