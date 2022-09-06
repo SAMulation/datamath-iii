@@ -156,7 +156,25 @@ class Calculator {
     }
 
     negate() {
-        // This is where we leave off
+        // Need exception to handle recent answer (which is lastNum)
+        let current = this.getCurrentNum();
+
+        if (current !== 'a') {
+            if (!isNaN(current)) {
+                current = current.toString();
+            }
+
+            // Already negative
+            if (current[0] === '-') {
+                current = current.substring(1);
+            // Currently positive
+            } else {
+                current = '-' + current;
+            }
+
+            this.setCurrentNum(current);
+            this.updateScreen(this.getCurrentNum())
+        }
     }
 
     numberInput(kp) {
