@@ -28,7 +28,10 @@ class Calculator {
         this.currentNum = 'a';
         this.lastNum = 'a';
         this.operator = '';
-        this.lastOperator = '';
+        this.lastOperation = {
+            op: '',
+            num: 'a'
+        };
         this.rootElement = root;
 
         this.bindButtons();
@@ -100,7 +103,11 @@ class Calculator {
     }
 
     getLastOperator() {
-        return this.lastOperator;
+        return this.lastOperation.op;
+    }
+
+    getLastOpNum() {
+        return this.lastOperation.num;
     }
 
     setState(idx) {
@@ -119,8 +126,12 @@ class Calculator {
         this.operator = num;
     }
 
-    setLastOperator(num) {
-        this.lastOperator = num;
+    setLastOperator(op) {
+        this.lastOperation.op = op;
+    }
+
+    setLastOpNum(num) {
+        this.lastOperation.num = num;
     }
 
     handleKeyPress(kp) {
@@ -214,6 +225,7 @@ class Calculator {
             this.setLastNum('a');
             this.setOperator('');
             this.setLastOperator('');
+            this.setLastOpNum('a');
             this.updateScreen();
         }
     }
@@ -239,13 +251,19 @@ class Calculator {
     }
 
     evaluate(op = "=") {
+        // Edge case of hitting equals multiple times
+        if (this.getState() === 'one' && this.getLastOperator()) {
+            op = this.getLastOperator();
+            this.setCurrentNum(this.getLastOpNum);
+        }
+        
         if (op === "=") {
             op = this.getOperator();
         }
 
         // Edge case of equals hit after hitting operator
-        if (this.getState === 'next') {
-            this.setCurrentNum(this.getLastNum);
+        if (this.getState() === 'next') {
+            this.setCurrentNum(this.getLastNum());
         }
 
         if (op === '+') {
@@ -263,9 +281,10 @@ class Calculator {
 
     resetOperator() {
         this.updateScreen(this.getLastNum());
-        this.setCurrentNum('a');
         this.setLastOperator(this.getOperator());
+        this.setLastOpNum(this.getCurrentNum());
         this.setOperator('');
+        this.setCurrentNum('a');
         this.setState(1);
     }
 
