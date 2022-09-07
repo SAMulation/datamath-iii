@@ -5,15 +5,15 @@
         legal: 0-9 (adding to C/keep adding to C) stay at this, op (+,-,*,/) record op and go to 'next'; = does nothing; % acts on C
     1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
         legal: 0-9 (adding to C then go to 'nolast'), op (=, +,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
-    1.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
+    2.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
     // 3 -> 2
-    2: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
+    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
         legal 0-9 (adding to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
-    3.5: 'nexty' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
-    4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
+    4: 'nexty' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
+    5: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one' (which has LastOperation)
-    5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
+    5.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
         action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
     6: 'error' = DIV/0 or overflow errors
 
@@ -245,7 +245,7 @@ class Calculator {
         let state = this.getStateIndex();
 
         // Stop looking for post-eval operator
-        if (state === 1 && this.getLastOperator()) {
+        if (state === 1) {
             this.resetLastOperator();
         }
 
@@ -257,12 +257,13 @@ class Calculator {
         console.log("currentNum: " + this.getCurrentNum());
         console.log("LastNum: " + this.getLastNum());
         
-        if (state === 0) {
-            state = 1;            
+        if (state === 0 || state == 1) {
+            state = 2;            
         } else if (state == 3) {
             state = 4;
         }
-        return state;
+        
+        this.setState(state);
     }
 
     resetLastOperator() {
@@ -277,7 +278,7 @@ class Calculator {
         } else if (state === 'next') {
             this.setOperator(kp);
         } else if (state === 'one') {
-            this.setState(2);
+
 
             // Trying to do an operation on an answer
             if (this.getLastOperator() !== '') {
@@ -289,7 +290,7 @@ class Calculator {
             }
 
             this.resetLastOperator();
-            this.setState(3);
+            this.setState(2);
         }
     }
 
@@ -343,6 +344,8 @@ class Calculator {
         // Not on start or after an answer
         // HERE: This still needs to be reworked
         //       Also, prevent BS to 'a'
+                        // HERE: Making sure BS works but not on answers
+                //       and can't bring up 'a'
         if (this.getState() !== 'start' && !(this.getState() === 'one' && this.getLastOperator !== '')) {  
             if(this.getState() === 'next') {  //On last, clear operator
                 this.setOperator('');
@@ -435,15 +438,7 @@ class Calculator {
         this.rootElement.querySelector('.screen').textContent = displayText;
     }
 
-    resetOperands() {
-        this.operands = ['a', 'a'];
-        this.currentOperand = 0;
-    }
-
-
 }
-  
-  
 
 const calculator1 = new Calculator(document.querySelector('.calc1'));
 // const calculator2 = new Calculator(document.querySelector('.calc2'));
