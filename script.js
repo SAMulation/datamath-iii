@@ -6,8 +6,8 @@
     1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
         legal: 0-9 (adding to C then go to 'nolast'), op (=, +,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
     1.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
-
-    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
+    // 3 -> 2
+    2: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
         legal 0-9 (adding to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
     3.5: 'nexty' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
@@ -182,13 +182,9 @@ class Calculator {
         if (!isNaN(kp)) {
             // Max length of 10 for currentNum (may change that later)
             if (this.currentNum.length < 10) {
-                this.setState(this.numberInput(kp));
-                // HERE: Making sure BS works but not on answers
-                //       and can't bring up 'a'
-                if (this.getLastOperator() !== '') {
-                    this.resetLastOperator();
-                }
+                this.numberInput(kp);
             }
+
         // Decimal
         } else if (kp === '.') {
             // Don't add a decimal if it's already there
@@ -196,16 +192,28 @@ class Calculator {
                 this.setCurrentNum((this.getCurrentNum() === 'a') ? '0.' : this.getCurrentNum() + ".");
                 this.updateScreen(this.getCurrentNum());
             }
+        
+        // Equals
         } else if (kp === "=") {
             this.evaluate((this.getState() === 'next') ? this.getOperator() : "=");
+
+        // Operators
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
             this.handleOperator(kp);   
+
+        // Percentage
         } else if (kp === '%') {
             this.percent();
+
+        // Negation
         } else if (kp === "N") {
             this.negate();
+
+        // Backspace
         } else if (kp === 'B') {
             this.backspace();
+
+        // Clear (Mostly for keypresses)
         } else if (kp === 'C') {
             this.clearScreen();
         }
