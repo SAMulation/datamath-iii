@@ -57,13 +57,20 @@ p.subhead {
     user-select: none;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-gap: 1em;
+    grid-gap: .5em;
 }
 
-.buttonArea div {
+.buttonArea div:not(.row3) {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.row3 {
+    grid-column: span 4;
+    display: grid;
+    grid-template-columns: 3fr 2fr 3fr;
+    grid-column-gap: .5em;
 }
 
 /* .row4 {
