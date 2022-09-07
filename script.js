@@ -1,21 +1,21 @@
 /*  STATES EXPLAINED
     0: 'start' = calc just opened // [C] = N, [L] = N, [O] = N, [LO] = N
-        legal: 0-9 (adding to C) go to 'nolast', no operators b/c no # stored; =, (-): does nothing
+        legal: 0-9 (add first char to C) go to 'nolast', no operators b/c no # stored; =, (-): does nothing
+    1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
+        legal: 0-9 (adding to C then go to 'nolast'), op (+,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
     2: 'nolast' = typing in current, no last yet // [C] = x, [L] = N, [O] = N, [LO] = N
         legal: 0-9 (adding to C/keep adding to C) stay at this, op (+,-,*,/) record op and go to 'next'; = does nothing; % acts on C
-    1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
-        legal: 0-9 (adding to C then go to 'nolast'), op (=, +,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
     2.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
     // 3 -> 2
     3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
-        legal 0-9 (adding to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
-    4: 'nexty' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
-    5: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
-        legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one' (which has LastOperation)
-    5.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
+        legal 0-9 (add first char to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
+    4: 'full' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
+    4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
+        legal: 0-9 (adding to C), op (+,-,*,/,%) initiates eval, then goes to 'next' (which has LastOperation), = evals and goes to 'one'
+    4.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
         action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
-    6: 'error' = DIV/0 or overflow errors
+    5: 'error' = DIV/0 or overflow errors
 
     always: . on C (if blank then '0.' else append '.')
     except 'start': CLR yes (else N)
@@ -26,7 +26,7 @@
 class Calculator {
     constructor(root) {
         this.state = {
-            options: ['start', 'one', 'op', 'next', 'full', 'post'],
+            options: ['start', 'one', 'nolast', 'next', 'full', 'error'],
             index: 0
         }
         this.currentNum = 'a';
@@ -219,28 +219,6 @@ class Calculator {
         }
     }
 
-    negate() {
-        // Need exception to handle recent answer (which is lastNum)
-        let current = this.getCurrentNum();
-
-        if (current !== 'a') {
-            if (!isNaN(current)) {
-                current = current.toString();
-            }
-
-            // Already negative
-            if (current[0] === '-') {
-                current = current.substring(1);
-            // Currently positive
-            } else {
-                current = '-' + current;
-            }
-
-            this.setCurrentNum(current);
-            this.updateScreen(this.getCurrentNum())
-        }
-    }
-
     numberInput(kp) {
         let state = this.getStateIndex();
 
@@ -266,67 +244,73 @@ class Calculator {
         this.setState(state);
     }
 
+    handleOperator(kp) {
+        const state = this.getState();
+
+        if (state === 'one' || state === 'nolast') {
+            this.setOperator(kp);
+            if (state === 'one') {
+                this.resetLastOperator();
+            }
+            this.setState(3);
+
+        // Just updating the operator
+        } else if (state === 'next') {
+            this.setOperator(kp);
+        } else if (state === 'full') {
+            this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
+            this.setOperator(kp);
+            this.resetOperator();  // Necessary?
+            this.setState(3);
+
+        }
+        // if (state === 'full') {
+        //     this.evaluate(kp);
+        // } else if (state === 'next') {
+        //     this.setOperator(kp);
+        // } else if (state === 'one') {
+
+
+        //     // Trying to do an operation on an answer
+        //     if (this.getLastOperator() !== '') {
+        //         this.setOperator(this.getLastOperator());
+        //     } else {
+        //         this.setLastNum(Number(this.getCurrentNum()));
+        //         this.setCurrentNum('a');
+        //         this.setOperator(kp);
+        //     }
+
+        //     this.resetLastOperator();
+        //     this.setState(2);
+        // }
+    }
+
+    negate() {
+        // Need exception to handle recent answer (which is lastNum)
+        let current = this.getCurrentNum();
+
+        if (current !== 'a') {
+            if (!isNaN(current)) {
+                current = current.toString();
+            }
+
+            // Already negative
+            if (current[0] === '-') {
+                current = current.substring(1);
+            // Currently positive
+            } else {
+                current = '-' + current;
+            }
+
+            this.setCurrentNum(current);
+            this.updateScreen(this.getCurrentNum())
+        }
+    }
+
     resetLastOperator() {
         this.setLastOperator('');
         this.setLastOpNum('a');
     }
-
-    handleOperator(kp) {
-        const state = this.getState();
-        if (state === 'full') {
-            this.evaluate(kp);
-        } else if (state === 'next') {
-            this.setOperator(kp);
-        } else if (state === 'one') {
-
-
-            // Trying to do an operation on an answer
-            if (this.getLastOperator() !== '') {
-                this.setOperator(this.getLastOperator());
-            } else {
-                this.setLastNum(Number(this.getCurrentNum()));
-                this.setCurrentNum('a');
-                this.setOperator(kp);
-            }
-
-            this.resetLastOperator();
-            this.setState(2);
-        }
-    }
-
-
-        // // operator, currentNum, and lastNum assigned and ready for next operator
-        // if (this.lastNum !== 'a') {
-        //     // So, evaluate
-        //     this.evaluate(this.operator);
-        // }
-
-        // // Only one number assigned
-        // if (this.currentNum !== 'a') {
-        //     // No operator assigned (Just got done evaluating or just one number so far)
-        //     // OR, operator assigned but different one was pressed
-        //     // Either way, just assign this one
-        //     if (this.operator !== kp) {
-        //         if (this.operator === '') {
-        //             this.lastNum = this.currentNum;
-        //             this.numString = '';
-        //         }
-
-        //         this.operator = kp;
-        //     }
-
-        // } 
-
-        // // No numbers assigned, don't assign operator
-        // // Unless you hit 'minus', then do +/- operation
-        // if (kp === '-') {
-        //     this.numString = (this.numString === '-') ? '' : '-';
-        //     // this.currentNum = Number(this.numString);
-        //     // this.updateScreen(this.currentNum);
-        // }
-        // console.log("operator: " + this.operator);
-    
-
 
     clearScreen() {
         if (this.getState()) {
