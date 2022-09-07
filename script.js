@@ -10,7 +10,7 @@
     3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
         legal 0-9 (adding to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
-    3.5: 'nexty' = same as above, but C is not blank // [C] = x // % short circuits
+    3.5: 'nexty' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
     4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
         legal: 0-9 (adding to C), op (=, +,-,*,/,%) initiates eval, then goes to 'one' (which has LastOperation)
     5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
