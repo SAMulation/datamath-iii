@@ -286,7 +286,7 @@ class Calculator {
     }
 
     equals() {
-        state = this.getState();
+        const state = this.getState();
 
         if (state === 'one') {
             this.evaluate(this.getCurrentNum(), this.getLastOpNum(), this.getLastOperator());
@@ -348,31 +348,62 @@ class Calculator {
         this.setLastNum(Number(c) / Number(l));
     }
 
-    percent(c) {
-        this.setLastNum(Number(c) / 100);
-        this.resetOperator();
+    percent() {
+        let state = this.getState();
+        let num;  // Will not get set on 'start'
+        let next;
+
+        if (state === 'one' || state === 'next') {
+            num = this.getLastNum();
+            next = 3;
+        } else if (state === 'nolast' || state === 'full') {
+            num = this.getCurrentNum();
+            next = 1;
+        }
+
+        if (num) {  // Skip if 'start'
+            if (state === 'full') {
+                this.evaluate(Number(num) / 100, this.getLastNum(), this.getOperator());
+            } else {
+            this.setLastNum(Number(num) / 100);
+            this.resetOperator(this.getLastNum());
+            this.setState(next);
+            }
+        }
     }
 
     negate() {
-        // Need exception to handle recent answer (which is lastNum)
-        let current = this.getCurrentNum();
+        let state = this.getState();
 
-        if (current !== 'a') {
-            if (!isNaN(current)) {
-                current = current.toString();
-            }
-
-            // Already negative
-            if (current[0] === '-') {
-                current = current.substring(1);
-            // Currently positive
-            } else {
-                current = '-' + current;
-            }
-
-            this.setCurrentNum(current);
-            this.updateScreen(this.getCurrentNum())
+        // "I just want to switch sign of the number I'm inputting"
+        if (state === 'nolast' || state === 'full') {
+            this.setCurrentNum((-this.getCurrentNum()).toString());
+        // "I want to invert my last answer, disregard any curr/prev operator pressed/remembered"
+        } else if (state === 'one' || state === 'next') {
+            this.setLastNum((-this.getLastNum()).toString());
+            this.resetOperator(this.getLastNum());
+            this.setState(3);  // Not 'one' because no lastOperation
         }
+
+        // // Need exception to handle recent answer (which is lastNum)
+        // let current = this.getCurrentNum();
+
+        // if (current !== 'a') {
+        //     if (!isNaN(current)) {
+        //         current = current.toString();
+        //     }
+
+        //     // Already negative
+        //     if (current[0] === '-') {
+        //         current = current.substring(1);
+        //     // Currently positive
+        //     } else {
+        //         current = '-' + current;
+        //     }
+
+        //     this.setCurrentNum(current);
+        //     this.updateScreen(this.getCurrentNum())
+        // }
     }
 
     resetOperator(n) {
