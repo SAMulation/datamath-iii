@@ -252,6 +252,11 @@ class Calculator {
             if (state === 'one') {
                 this.resetLastOperator();
             }
+            // Move current to last
+            if (state === 'nolast') {
+                this.setLastNum(this.getCurrentNum());
+                this.setCurrentNum('a');
+            }
             this.setState(3);
 
         // Just updating the operator
@@ -289,7 +294,12 @@ class Calculator {
         const state = this.getState();
 
         if (state === 'one') {
-            this.evaluate(this.getCurrentNum(), this.getLastOpNum(), this.getLastOperator());
+            if (this.getLastOperator() === '-' || this.getLastOperator() === '/') {
+                this.evaluate(this.getLastOpNum(), this.getLastNum(), this.getLastOperator());
+            } else {
+                this.evaluate(this.getLastNum(), this.getLastOpNum(), this.getLastOperator());
+            }
+            
         } else if (state === 'next') {
             this.evaluate(this.getLastNum(), this.getLastNum(), this.getOperator());
             this.setState(1);
@@ -320,32 +330,36 @@ class Calculator {
         // }
 
         if (op === '+') {
-            this.addition(c, l);
+            this.addition(l, c);
         } else if (op === '-') {
-            this.subtraction(c, l);
+            this.subtraction(l, c);
         } else if (op === '*') {
-            this.multiplication(c, l);
+            this.multiplication(l, c);
         } else {  // Division
-            this.division(c, l);
+            this.division(l, c);
         }
 
-        this.resetOperator(this.getLastNum());
+        if (this.getState() !== 'one' && this.getState() !== 'next') {
+            this.resetOperator(this.getLastNum());
+        } else {
+            this.updateScreen(this.getLastNum());
+        }
     }
 
-    addition(c, l) {
-        this.setLastNum(Number(c) + Number(l));
+    addition(l, c) {
+        this.setLastNum(Number(l) + Number(c));
     }
 
-    subtraction(c, l) {
-        this.setLastNum(Number(c) - Number(l));
+    subtraction(l, c) {
+        this.setLastNum(Number(l) - Number(c));
     }
 
-    multiplication(c, l) {
-        this.setLastNum(Number(c) * Number(l));
+    multiplication(l, c) {
+        this.setLastNum(Number(l) * Number(c));
     }
 
-    division(c, l) {
-        this.setLastNum(Number(c) / Number(l));
+    division(l, c) {
+        this.setLastNum(Number(l) / Number(c));
     }
 
     percent() {
@@ -471,7 +485,10 @@ class Calculator {
     }
 
     updateScreen(displayText = "Let's math!") {
-        if (!isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
+        if (displayText.length >= 22) {
+            displayText = 'Overflow error!';
+            this.setState(0);
+        } else if (!isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
             displayText = Math.floor(displayText * 10000000000) / 10000000000;
         }
         this.rootElement.querySelector('.screen').textContent = displayText;
