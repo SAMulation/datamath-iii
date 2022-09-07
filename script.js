@@ -421,43 +421,57 @@ class Calculator {
     }
 
     clearScreen() {
-        if (this.getState()) {
-            this.setState(0);
+        if (this.getState()) {  // Not 'start'
+            // Reset all variables
             this.setCurrentNum('a');
             this.setLastNum('a');
             this.setOperator('');
             this.resetLastOperator();
             this.updateScreen();
+            this.setState(0);
         }
     }
 
     backspace() {
+        const state = this.getState();
+
+        if (state === 'nolast' || state === 'full') {
+            let string = this.getCurrentNum();
+            string = string.slice(0,-1);
+            // No more characters
+            this.updateScreen(string.length ? string : null);
+            if (!string.length) {
+                string = 'a';
+            }
+            this.setCurrentNum(string);
+        }
+
         //console.log(this.getState());
         // Not on start or after an answer
         // HERE: This still needs to be reworked
         //       Also, prevent BS to 'a'
                         // HERE: Making sure BS works but not on answers
                 //       and can't bring up 'a'
-        if (this.getState() !== 'start' && !(this.getState() === 'one' && this.getLastOperator !== '')) {  
-            if(this.getState() === 'next') {  //On last, clear operator
-                this.setOperator('');
-                this.setCurrentNum(this.getLastNum());
-                this.setLastNum('a');
-                this.setState(1);
-            }
-            let string = this.getCurrentNum();
-            string = string.slice(0,-1);
-            if (string === '') {
-                string = 'a';
-            }
-            //console.log(string);
-            this.setCurrentNum(string);
-            this.updateScreen(this.getCurrentNum());
-        }
+        // if (this.getState() !== 'start' && !(this.getState() === 'one' && this.getLastOperator !== '')) {  
+        //     if(this.getState() === 'next') {  //On last, clear operator
+        //         this.setOperator('');
+        //         this.setCurrentNum(this.getLastNum());
+        //         this.setLastNum('a');
+        //         this.setState(1);
+        //     }
+        //     let string = this.getCurrentNum();
+        //     string = string.slice(0,-1);
+        //     if (string === '') {
+        //         string = 'a';
+        //     }
+        //     //console.log(string);
+        //     this.setCurrentNum(string);
+        //     this.updateScreen(this.getCurrentNum());
+        //}
     }
 
     updateScreen(displayText = "Let's math!") {
-        if (!isNaN(displayText) && displayText.toString().includes('.')) {
+        if (!isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
             displayText = Math.floor(displayText * 10000000000) / 10000000000;
         }
         this.rootElement.querySelector('.screen').textContent = displayText;
