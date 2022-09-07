@@ -43,7 +43,7 @@ class Calculator {
     bindButtons() {
         // Clear press or press and hold
         const clear = this.rootElement.querySelector('#clear');
-        const buttons = this.rootElement.querySelectorAll('button:not(#clear)');
+        const buttons = this.rootElement.querySelectorAll('.button:not(#clear)');
 
         buttons.forEach(button => {
             button.addEventListener('click', event => {

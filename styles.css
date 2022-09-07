@@ -53,7 +53,20 @@ p.subhead {
     margin: auto 17px;
 }
 
-.row4 {
+.buttonArea {
+    user-select: none;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1em;
+}
+
+.buttonArea div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* .row4 {
     display: flex;
     justify-content: center;
     gap: 10px;
@@ -65,35 +78,36 @@ p.subhead {
     justify-content: center;
     gap: 10px;
     margin: auto 17px;
-}
+} */
 
-button {
+.button {
     font-family: 'Share Tech Mono', sans-serif;
     min-width: 50px;
     height: 50px;
-    font-size: 40px;
+    font-size: 2em;
     background-color: rgb(240, 240, 240);
+    border-radius: 5px;
 }
 
-button:hover {
+.button:hover {
     background-color: white;
 }
 
-button.grey:hover {
+.button.grey:hover {
     background-color: rgb(223, 223, 223);
 }
 
-button.orange:hover {
+.button.orange:hover {
     background-color: rgb(236, 198, 126);
 }
 
-.flexOne {
+/* .flexOne {
     flex: 1;
 }
 
 .flexTwo {
     flex: 2;
-}
+} */
 
 .grey {
     background-color: rgb(180, 180, 180);
