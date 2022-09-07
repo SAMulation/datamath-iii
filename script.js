@@ -13,8 +13,8 @@
     4: 'full' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
     4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
         legal: 0-9 (adding to C), op (+,-,*,/,%) initiates eval, then goes to 'next' (which has LastOperation), = evals and goes to 'one'
-    4.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N
-        action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one-no-op' but store lastOp for equal
+    4.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N, [LO] = lo,ln
+        action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one' but store lastOp for equal
     5: 'error' = DIV/0 or overflow errors
 
     always: . on C (if blank then '0.' else append '.')
@@ -195,7 +195,7 @@ class Calculator {
         
         // Equals
         } else if (kp === "=") {
-            this.evaluate((this.getState() === 'next') ? this.getOperator() : "=");
+            this.equals();
 
         // Operators
         } else if (kp === "+" || kp === "-" || kp === "*" || kp === "/") {
@@ -285,6 +285,74 @@ class Calculator {
         // }
     }
 
+    equals() {
+        state = this.getState();
+
+        if (state === 'one') {
+            this.evaluate(this.getCurrentNum(), this.getLastOpNum(), this.getLastOperator());
+        } else if (state === 'next') {
+            this.evaluate(this.getLastNum(), this.getLastNum(), this.getOperator());
+            this.setState(1);
+        } else if (state === 'full') {
+            this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
+            // Store c as lastOpNum, op as lastOperator ... but where?
+            this.setState(1);
+        }
+    }
+
+    evaluate(c, l, op) {
+        
+        // // Edge case of hitting equals multiple times
+        // if (this.getState() === 'one' && this.getLastOperator()) {
+        //     op = this.getLastOperator();
+        //     this.setOperator(op);
+        //     this.setCurrentNum(this.getLastOpNum());
+        //     this.setState(4);
+        // }
+
+        // if (op === "=") {
+        //     op = this.getOperator();
+        // }
+
+        // // Edge case of equals hit after hitting operator
+        // if (this.getState() === 'next') {
+        //     this.setCurrentNum(this.getLastNum());
+        // }
+
+        if (op === '+') {
+            this.addition(c, l);
+        } else if (op === '-') {
+            this.subtraction(c, l);
+        } else if (op === '*') {
+            this.multiplication(c, l);
+        } else {  // Division
+            this.division(c, l);
+        }
+
+        this.resetOperator(this.getLastNum());
+    }
+
+    addition(c, l) {
+        this.setLastNum(Number(c) + Number(l));
+    }
+
+    subtraction(c, l) {
+        this.setLastNum(Number(c) - Number(l));
+    }
+
+    multiplication(c, l) {
+        this.setLastNum(Number(c) * Number(l));
+    }
+
+    division(c, l) {
+        this.setLastNum(Number(c) / Number(l));
+    }
+
+    percent(c) {
+        this.setLastNum(Number(c) / 100);
+        this.resetOperator();
+    }
+
     negate() {
         // Need exception to handle recent answer (which is lastNum)
         let current = this.getCurrentNum();
@@ -305,6 +373,15 @@ class Calculator {
             this.setCurrentNum(current);
             this.updateScreen(this.getCurrentNum())
         }
+    }
+
+    resetOperator(n) {
+        this.updateScreen(n);
+        this.setLastOperator(this.getOperator());
+        this.setLastOpNum(this.getCurrentNum());
+        this.setOperator('');
+        this.setCurrentNum('a');
+        this.setState(1);
     }
 
     resetLastOperator() {
@@ -346,73 +423,6 @@ class Calculator {
             this.setCurrentNum(string);
             this.updateScreen(this.getCurrentNum());
         }
-    }
-
-    evaluate(op = "=") {
-        
-        // Edge case of hitting equals multiple times
-        if (this.getState() === 'one' && this.getLastOperator()) {
-            op = this.getLastOperator();
-            this.setOperator(op);
-            this.setCurrentNum(this.getLastOpNum());
-            this.setState(4);
-        }
-
-        if (op === "=") {
-            op = this.getOperator();
-        }
-
-        // Edge case of equals hit after hitting operator
-        if (this.getState() === 'next') {
-            this.setCurrentNum(this.getLastNum());
-        }
-
-        //this.setState(5);
-        if (op === '+') {
-            this.addition();
-        } else if (op === '-') {
-            this.subtraction();
-        } else if (op === '*') {
-            this.multiplication();
-        } else {  // Division
-            this.division();
-        }
-
-        //this.resetOperator();
-    }
-
-    resetOperator() {
-        this.updateScreen(this.getLastNum());
-        this.setLastOperator(this.getOperator());
-        this.setLastOpNum(this.getCurrentNum());
-        this.setOperator('');
-        this.setCurrentNum('a');
-        this.setState(1);
-    }
-
-    addition() {
-        this.setLastNum(Number(this.getCurrentNum()) + Number(this.getLastNum()));
-        this.resetOperator();
-    }
-
-    subtraction() {
-        this.setLastNum(Number(this.getCurrentNum()) - Number(this.getLastNum()));
-        this.resetOperator();
-    }
-
-    percent() {
-        this.setLastNum(Number(this.getCurrentNum()) / 100);
-        this.resetOperator();
-    }
-
-    multiplication() {
-        this.setLastNum(Number(this.getCurrentNum()) * Number(this.getLastNum()));
-        this.resetOperator();
-    }
-
-    division() {
-        this.setLastNum(Number(this.getCurrentNum()) / Number(this.getLastNum()));
-        this.resetOperator();
     }
 
     updateScreen(displayText = "Let's math!") {
