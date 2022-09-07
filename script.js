@@ -229,18 +229,23 @@ class Calculator {
         if (this.getCurrentNum() === 'a') {
             this.setCurrentNum('');
         }
-        this.setCurrentNum(this.getCurrentNum() + kp.toString());
-        this.updateScreen(this.getCurrentNum());
-        console.log("currentNum: " + this.getCurrentNum());
-        console.log("LastNum: " + this.getLastNum());
-        
-        if (state === 0 || state == 1) {
-            state = 2;            
-        } else if (state == 3) {
-            state = 4;
+
+        // Protecting against leading zeroes
+        if (!(this.getCurrentNum() === '0' && kp === '0')) {
+            // Prevents leading zeroes after backspace second number
+            this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
+            this.updateScreen(this.getCurrentNum());
+            console.log("currentNum: " + this.getCurrentNum());
+            console.log("LastNum: " + this.getLastNum());
+            
+            if (state === 0 || state == 1) {
+                state = 2;            
+            } else if (state == 3) {
+                state = 4;
+            }
+            
+            this.setState(state);
         }
-        
-        this.setState(state);
     }
 
     handleOperator(kp) {
@@ -264,7 +269,8 @@ class Calculator {
         } else if (state === 'full') {
             this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
             this.setOperator(kp);
-            this.resetOperator();  // Necessary?
+            //this.resetOperator(this.getLastNum());  // Necessary?
+            this.resetLastOperator();
             this.setState(3);
 
         }
@@ -377,16 +383,24 @@ class Calculator {
     }
 
     backspace() {
-        const state = this.getState();
+        let state = this.getState();
+        let string = this.getCurrentNum();
 
         if (state === 'nolast' || state === 'full') {
-            let string = this.getCurrentNum();
             string = string.slice(0,-1);
             // No more characters
-            this.updateScreen(string.length ? string : null);
             if (!string.length) {
-                string = 'a';
+                if (state === 'nolast') {
+                    state = 0;
+                    string = 'a';
+                } else {
+                    state = 3;
+                    string = '0';
+                }
+                this.setState(state);
             }
+            this.setState(this.getStateIndex());
+            this.updateScreen(string === 'a' ? undefined : string);
             this.setCurrentNum(string);
         }
     }
