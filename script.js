@@ -6,7 +6,6 @@
     2: 'nolast' = typing in current, no last yet // [C] = x, [L] = N, [O] = N, [LO] = N
         legal: 0-9 (adding to C/keep adding to C) stay at this, op (+,-,*,/) record op and go to 'next'; = does nothing; % acts on C
     2.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
-    // 3 -> 2
     3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
         action: move C to L, clear C; fill op
         legal 0-9 (add first char to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
@@ -269,25 +268,6 @@ class Calculator {
             this.setState(3);
 
         }
-        // if (state === 'full') {
-        //     this.evaluate(kp);
-        // } else if (state === 'next') {
-        //     this.setOperator(kp);
-        // } else if (state === 'one') {
-
-
-        //     // Trying to do an operation on an answer
-        //     if (this.getLastOperator() !== '') {
-        //         this.setOperator(this.getLastOperator());
-        //     } else {
-        //         this.setLastNum(Number(this.getCurrentNum()));
-        //         this.setCurrentNum('a');
-        //         this.setOperator(kp);
-        //     }
-
-        //     this.resetLastOperator();
-        //     this.setState(2);
-        // }
     }
 
     equals() {
@@ -311,24 +291,6 @@ class Calculator {
     }
 
     evaluate(c, l, op) {
-        
-        // // Edge case of hitting equals multiple times
-        // if (this.getState() === 'one' && this.getLastOperator()) {
-        //     op = this.getLastOperator();
-        //     this.setOperator(op);
-        //     this.setCurrentNum(this.getLastOpNum());
-        //     this.setState(4);
-        // }
-
-        // if (op === "=") {
-        //     op = this.getOperator();
-        // }
-
-        // // Edge case of equals hit after hitting operator
-        // if (this.getState() === 'next') {
-        //     this.setCurrentNum(this.getLastNum());
-        // }
-
         if (op === '+') {
             this.addition(l, c);
         } else if (op === '-') {
@@ -363,7 +325,7 @@ class Calculator {
     }
 
     percent() {
-        let state = this.getState();
+        const state = this.getState();
         let num;  // Will not get set on 'start'
         let next;
 
@@ -387,7 +349,7 @@ class Calculator {
     }
 
     negate() {
-        let state = this.getState();
+        const state = this.getState();
 
         // "I just want to switch sign of the number I'm inputting"
         if (state === 'nolast' || state === 'full') {
@@ -398,26 +360,6 @@ class Calculator {
             this.resetOperator(this.getLastNum());
             this.setState(3);  // Not 'one' because no lastOperation
         }
-
-        // // Need exception to handle recent answer (which is lastNum)
-        // let current = this.getCurrentNum();
-
-        // if (current !== 'a') {
-        //     if (!isNaN(current)) {
-        //         current = current.toString();
-        //     }
-
-        //     // Already negative
-        //     if (current[0] === '-') {
-        //         current = current.substring(1);
-        //     // Currently positive
-        //     } else {
-        //         current = '-' + current;
-        //     }
-
-        //     this.setCurrentNum(current);
-        //     this.updateScreen(this.getCurrentNum())
-        // }
     }
 
     resetOperator(n) {
@@ -434,18 +376,6 @@ class Calculator {
         this.setLastOpNum('a');
     }
 
-    clearScreen() {
-        if (this.getState()) {  // Not 'start'
-            // Reset all variables
-            this.setCurrentNum('a');
-            this.setLastNum('a');
-            this.setOperator('');
-            this.resetLastOperator();
-            this.updateScreen();
-            this.setState(0);
-        }
-    }
-
     backspace() {
         const state = this.getState();
 
@@ -459,34 +389,27 @@ class Calculator {
             }
             this.setCurrentNum(string);
         }
+    }
 
-        //console.log(this.getState());
-        // Not on start or after an answer
-        // HERE: This still needs to be reworked
-        //       Also, prevent BS to 'a'
-                        // HERE: Making sure BS works but not on answers
-                //       and can't bring up 'a'
-        // if (this.getState() !== 'start' && !(this.getState() === 'one' && this.getLastOperator !== '')) {  
-        //     if(this.getState() === 'next') {  //On last, clear operator
-        //         this.setOperator('');
-        //         this.setCurrentNum(this.getLastNum());
-        //         this.setLastNum('a');
-        //         this.setState(1);
-        //     }
-        //     let string = this.getCurrentNum();
-        //     string = string.slice(0,-1);
-        //     if (string === '') {
-        //         string = 'a';
-        //     }
-        //     //console.log(string);
-        //     this.setCurrentNum(string);
-        //     this.updateScreen(this.getCurrentNum());
-        //}
+    clearScreen() {
+        if (this.getState()) {  // Not 'start'
+            // Reset all variables
+            this.setCurrentNum('a');
+            this.setLastNum('a');
+            this.setOperator('');
+            this.resetLastOperator();
+            this.updateScreen();
+            this.setState(0);
+        }
     }
 
     updateScreen(displayText = "Let's math!") {
-        if (displayText.length >= 22) {
-            displayText = 'Overflow error!';
+        console.log(displayText);
+        if (displayText.toString().length > 20) {
+            displayText = 'Overflow!';
+            this.setState(0);
+        } else if (displayText === Infinity) {
+            displayText = 'DIV/0!';
             this.setState(0);
         } else if (!isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
             displayText = Math.floor(displayText * 10000000000) / 10000000000;
