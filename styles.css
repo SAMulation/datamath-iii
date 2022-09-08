@@ -5,6 +5,7 @@
 * {
     box-sizing: border-box;
     font-family: 'Share Tech Mono', sans-serif;
+    user-select: none;
 }
 
 .body {
@@ -54,7 +55,6 @@ p.subhead {
 }
 
 .buttonArea {
-    user-select: none;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-gap: .5em;
