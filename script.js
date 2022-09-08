@@ -46,7 +46,8 @@ class Calculator {
         const buttons = this.rootElement.querySelectorAll('.button:not(#clear)');
 
         buttons.forEach(button => {
-            button.addEventListener('click', event => {
+            // was click
+            button.addEventListener('pointerdown', event => {
                 console.log('click');
                 this.handleKeyPress(event.target.getAttribute("data-btn"));
             });
@@ -56,7 +57,8 @@ class Calculator {
         mouseHoldTimeout,
         mouseDownDone = false;
 
-        clear.addEventListener('mousedown', event => {
+        // was mousedown
+        clear.addEventListener('pointerdown', event => {
             mouseHoldTimeout = setTimeout(() => {
                 value++;
                 mouseDownDone = true;
@@ -65,7 +67,8 @@ class Calculator {
               }, 500);
         });
 
-        clear.addEventListener('click', event => {
+        // was click
+        clear.addEventListener('pointerup', event => {
             if (mouseHoldTimeout) {
               clearTimeout(mouseHoldTimeout);
               mouseHoldTimeout = null;
@@ -233,7 +236,8 @@ class Calculator {
         // Protecting against leading zeroes
         if (!(this.getCurrentNum() === '0' && kp === '0')) {
             // Prevents leading zeroes after backspace second number
-            this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
+            //this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
+            this.setCurrentNum((this.getCurrentNum()[this.getCurrentNum().length - 1] === ".") ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
             this.updateScreen(this.getCurrentNum());
             console.log("currentNum: " + this.getCurrentNum());
             console.log("LastNum: " + this.getLastNum());
@@ -425,7 +429,7 @@ class Calculator {
         } else if (displayText === Infinity) {
             displayText = 'DIV/0!';
             this.setState(0);
-        } else if (!isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
+        } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
             displayText = Math.floor(displayText * 10000000000) / 10000000000;
         }
         this.rootElement.querySelector('.screen').textContent = displayText;
