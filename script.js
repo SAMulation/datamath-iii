@@ -237,7 +237,8 @@ class Calculator {
         if (!(this.getCurrentNum() === '0' && kp === '0')) {
             // Prevents leading zeroes after backspace second number
             //this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
-            this.setCurrentNum((this.getCurrentNum()[this.getCurrentNum().length - 1] === ".") ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
+            //this.setCurrentNum((this.getCurrentNum()[this.getCurrentNum().length - 1] === "." || this.getCurrentNum()[this.getCurrentNum().length - 1] == 0) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
+            this.setCurrentNum((this.getCurrentNum().includes('.')) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
             this.updateScreen(this.getCurrentNum());
             console.log("currentNum: " + this.getCurrentNum());
             console.log("LastNum: " + this.getLastNum());
@@ -429,9 +430,35 @@ class Calculator {
         } else if (displayText === Infinity) {
             displayText = 'DIV/0!';
             this.setState(0);
-        } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
-            displayText = Math.floor(displayText * 10000000000) / 10000000000;
+        // } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
+        } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.' && displayText[displayText.length - 1] !== '.') {
+            // Don't lose '2.0' on your way to '2.02'
+            if (!displayText.toString().includes('.0') && !(displayText[displayText.length - 1] === 0)) {
+                displayText = Math.floor(displayText * 10000000) / 10000000;
+                displayText = displayText.toString();
+            }
         }
+
+        displayText = displayText.toString();
+        console.log(displayText.length > 11);
+        if (displayText.length > 11) {
+            console.log('toolong')
+            displayText = displayText.substring(0,12);
+        }
+
+        // Remove trailing zeroes
+        if (displayText.includes('.') && this.getState() === 'one') {
+            while (displayText[displayText.length - 1] == 0) {
+                displayText = displayText.substring(0,displayText.length - 1);
+            }
+        }
+        // console.log(displayText);
+        // if (displayText.length > 11) {
+        //     console.log('toolong')
+        // }
+        // if (displayText.toString().length > 11) {
+        //     displayText = ((!isNan(displayText)) ? displayText.toString() : displayText).substring(0,12);
+        // }
         this.rootElement.querySelector('.screen').textContent = displayText;
     }
 
