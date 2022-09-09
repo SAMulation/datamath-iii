@@ -21,6 +21,8 @@
     unless 'start' or 'next': +/- on C (else on L), BS on C (else N), % on C (else on L)
 */
 
+const START = 0,
+      ONE = 1;
 
 class Calculator {
     constructor(root) {
@@ -42,8 +44,8 @@ class Calculator {
 
     bindButtons() {
         // Clear press or press and hold
-        const clear = this.rootElement.querySelector('#clear');
-        const buttons = this.rootElement.querySelectorAll('.button:not(#clear)');
+        const clear = this.rootElement.querySelector('.clear');
+        const buttons = this.rootElement.querySelectorAll('.button:not(.clear)');
 
         buttons.forEach(button => {
             // was click
@@ -53,17 +55,14 @@ class Calculator {
             });
         })
         
-        let value = 0,
-        mouseHoldTimeout,
-        mouseDownDone = false;
+        let mouseHoldTimeout;
 
         // was mousedown
         clear.addEventListener('pointerdown', event => {
             mouseHoldTimeout = setTimeout(() => {
-                value++;
-                mouseDownDone = true;
-                //console.log("Clear");
+                console.log("Clear");
                 this.clearScreen();
+                mouseHoldTimeout = false;
               }, 500);
         });
 
@@ -72,13 +71,9 @@ class Calculator {
             if (mouseHoldTimeout) {
               clearTimeout(mouseHoldTimeout);
               mouseHoldTimeout = null;
+              console.log("backspace")
               this.backspace()
             }
-            if (mouseDownDone) {
-              mouseDownDone = false;
-              return;
-            }
-            value += 15;
         });
 
         // Key Press Handling
@@ -238,7 +233,8 @@ class Calculator {
             // Prevents leading zeroes after backspace second number
             //this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
             //this.setCurrentNum((this.getCurrentNum()[this.getCurrentNum().length - 1] === "." || this.getCurrentNum()[this.getCurrentNum().length - 1] == 0) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
-            this.setCurrentNum((this.getCurrentNum().includes('.')) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
+            //this.setCurrentNum((this.getCurrentNum().includes('.')) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
+            this.setCurrentNum(this.getCurrentNum() + kp.toString());
             this.updateScreen(this.getCurrentNum());
             console.log("currentNum: " + this.getCurrentNum());
             console.log("LastNum: " + this.getLastNum());
@@ -424,14 +420,14 @@ class Calculator {
 
     updateScreen(displayText = "Let's math!") {
         console.log(displayText);
-        if (displayText.toString().length > 20) {
+        if (displayText.length > 20) {
             displayText = 'Overflow!';
             this.setState(0);
         } else if (displayText === Infinity) {
             displayText = 'DIV/0!';
             this.setState(0);
         // } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
-        } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.' && displayText[displayText.length - 1] !== '.') {
+        } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.') {
             // Don't lose '2.0' on your way to '2.02'
             if (!displayText.toString().includes('.0') && !(displayText[displayText.length - 1] === 0)) {
                 displayText = Math.floor(displayText * 10000000) / 10000000;
