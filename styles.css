@@ -1,27 +1,112 @@
 /* * {
     border: 1px solid red;
 } */
-
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
     font-family: 'Share Tech Mono', sans-serif;
     user-select: none;
-}
+  }
 
-.body {
+  body {
+    background: #e4e4e4;
+    padding: 5px;
+    height: 100vh;
+    margin: 0;
+  
+    /* font: 500 100% system-ui, sans-serif;
+    text-transform: uppercase; */
+  }
+
+  .page-wrap {
+    background: white;
+    height: calc(100vh - 10px);
+    box-shadow: 0 0 3px rgba(black, 0.33);
+  
+    display: grid;
+    grid-template-columns: minmax(10px, 3fr) minmax(10px, 1fr);
+    grid-template-rows: min-content 1fr min-content min-content;
+    gap: 1px;
+  }
+
+  .page-wrap > * {
+      padding: 1rem;
+      text-align: center;
+  }
+  
+
+  
+  .page-header {
+    grid-column: 1 / -1;
+    background: black;
+    color: white;
+    position: sticky;
+    top: 0;
+  }
+
+  .page-subheader {
+    display: none;
+    grid-column: 1 / -1;
+    background: rgb(185, 172, 135);;
+  }
+  
+  .page-main {
+    grid-row: span 1;
+    grid-column: 1 / 2;
+    background: white;
+  }
+
+  .page-sidebar {
+    grid-column: 2 / 3;
+    grid-row: span 1;
+    background: rgb(185, 172, 135);;
+  }
+
+
+  .page-subfooter {
+    grid-column: 1 / -1;
+    background: darkgray;
+  }
+  .page-footer {
+    grid-column: 1 / -1;
+    background: black;
+    color: white;
+  }
+
+  a {
+    color: dodgerblue;
+    text-decoration: none;
+  }
+  
+  details p {
+    text-transform: none;
+    text-align: left;
+  }
+  
+
+
+/* * {
+    box-sizing: border-box;
+    font-family: 'Share Tech Mono', sans-serif;
+    user-select: none;
+} */
+
+/* .body {
     display: flex;
     justify-content: center;
-}
+} */
 
 h1 {
-    font-size: 4em;
+    font-size: 3em;
     font-weight: bold;
     text-align: center;
 }
 
 p.subhead {
-    margin-top: -40px;
+    /* margin-top: -40px; */
     text-align: center;
+    font-size: 1em;
 }
 
 .calc1, .calc2 {
@@ -128,3 +213,41 @@ p.subhead {
     background-color: rgb(255, 255, 255);
     color: rgb(213, 150, 32);
 }
+
+@media (min-width: 1200px) {
+    h1 {
+        font-size: 4em;
+    }
+
+    p.subhead {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-subheader {
+        display: block;
+    }
+
+    .page-wrap {
+        grid-template-columns: 100%;
+        grid-template-rows: auto;
+    }
+
+    .page-wrap > * {
+        grid-column: 1 / -1 !important;
+        grid-row: auto !important;
+    }
+    
+    .page-sidebar {
+        display: none;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    p.subhead {
+        font-size: .5em;
+    }
+  }
