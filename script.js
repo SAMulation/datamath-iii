@@ -429,7 +429,7 @@ class Calculator {
         }
     }
 
-    updateScreen(displayText = "Let's math!") {
+    updateScreen(displayText = "Mathematical!") {
         console.log(displayText);
         if (displayText.length > 20) {
             displayText = 'Overflow!';
