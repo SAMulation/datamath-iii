@@ -1,35 +1,38 @@
 /*  STATES EXPLAINED
-    0: 'start' = calc just opened // [C] = N, [L] = N, [O] = N, [LO] = N
-        legal: 0-9 (add first char to C) go to 'nolast', no operators b/c no # stored; =, (-): does nothing
-    1: 'one' = post-eval, lastOperation still present // [C] = N, [L] = X, [O] = N, [LO] = lo,ln
-        legal: 0-9 (adding to C then go to 'nolast'), op (+,-,*,/,%) (clear lastOp); % act on L; = straight to post AND check for lastOp (to repeat)
-    2: 'nolast' = typing in current, no last yet // [C] = x, [L] = N, [O] = N, [LO] = N
-        legal: 0-9 (adding to C/keep adding to C) stay at this, op (+,-,*,/) record op and go to 'next'; = does nothing; % acts on C
-    2.5 (not used): 'op' = adding operator // before: [C] = X, [L] = N, [O] = N; after: [C] = N, [L] = X, [O] = X, go to 3
-    3: 'next' = first num in, op in, expected next number // [C] = N, [L] = X, [O] = X, [LO] = N
-        action: move C to L, clear C; fill op
-        legal 0-9 (add first char to C), ** %,+/- acts on L at first, then C (see 'nexty') **, = evals L, op (+,-,*,/) just switches
-    4: 'full' = same as above, but C is not blank // [C] = x, [L] = X, [O] = X, [LO] = N // % short circuits
-    4: 'full' = both nums in, op in, expecting evaluation // [C] = X, [L] = X, [O] = X
-        legal: 0-9 (adding to C), op (+,-,*,/,%) initiates eval, then goes to 'next' (which has LastOperation), = evals and goes to 'one'
-    4.5 (not used): 'post' = evaluation // before: [C] = X, [L] = X, [O] = X; after: [C] = N, [L] = X, [O] = N, [LO] = lo,ln
-        action: evaluate expression; move answer to L, clear C, move op to lastOp; go to 'one' but store lastOp for equal
-    5: 'error' = DIV/0 or overflow errors
+    // Variables
+    [C] = currentNum, [L] = lastNum, [O] = operator, [LO] = lastOperation (which holds lo(perator) and ln(um))
+        *  Variables either hold N(othing) or X (which is something)
+    0: START = calc just opened (formerly - 0: 'start')
+        vars state: [C] = N, [L] = N, [O] = N, [LO] = N
+        actions: 0-9 (add first char to C) go to ONEIN, no operators b/c no # stored; =, (-): also do nothing
+    1: ONEIN = Typing in currentNum, no lastNum (formerly - 2: 'nolast')
+        vars state: [C] = X, [L] = N, [O] = N, [LO] = N
+        actions: 0-9 (keep adding to C) stay at this, op (+,-,*,/) record op and go to POSTOP; = does nothing; % acts on C
+    2: POSTOP = lastNum is filled with last number, operator filled, waiting for first char of currentNum (formerly - 3: 'next')
+        vars state: [C] = N, [L] = X, [O] = X, [LO] = N
+        actions: 0-9 (add first char to C), ** %,+/- acts on L**, = evals L, op (+,-,*,/) just switches operator
+    3: READY = Everything is 'full,' waiting for another currentNum char or some evaluation (formerly - 4: 'full')
+        vars state: [C] = X, [L] = X, [O] = X, [LO] = N
+        actions: 0-9 (adding to C), op (+,-,*,/) initiates eval with current [O], then goes to POSTOP (with new op stored in [O]), = evals and goes to POSTEVAL
+        more actions: +/- acts on C; % act on C, then evaluates the current operator
+    4: POSTEVAL = Answered is stored in L, lastOperation is present in case = keeps getting pressed
+        vars state: [C] = N, [L] = X, [O] = N, [LO] = lo,ln
+        actions: 0-9 (add first char to C, then go to ONEIN), op (+,-,*,/,%) (clear LO); % act on L; = straight to post AND use LO (to repeat)
 
     always: . on C (if blank then '0.' else append '.')
-    except 'start': CLR yes (else N)
-    unless 'start' or 'next': +/- on C (else on L), BS on C (else N), % on C (else on L)
+    except START: CLR yes (else N)
+    unless START or POSTOP: +/- on C (else on L), BS on C (else N), % on C (else on L)
 */
 
 const START = 0,
-      ONE = 1;
+      ONEIN = 1,
+      POSTOP = 2,
+      READY = 3,
+      POSTEVAL = 4;
 
 class Calculator {
     constructor(root) {
-        this.state = {
-            options: ['start', 'one', 'nolast', 'next', 'full', 'error'],
-            index: 0
-        }
+        this.state = 0;
         this.currentNum = 'a';
         this.lastNum = 'a';
         this.operator = '';
@@ -122,13 +125,17 @@ class Calculator {
           }, true);
     }   
 
+    // getState() {
+    //     return this.state.options[this.state.index];
+    // }
+
     getState() {
-        return this.state.options[this.state.index];
+        return this.state;
     }
 
-    getStateIndex() {
-        return this.state.index;
-    }
+    // getStateIndex() {
+    //     return this.state.index;
+    // }
 
     getCurrentNum() {
         return this.currentNum;
@@ -150,8 +157,12 @@ class Calculator {
         return this.lastOperation.num;
     }
 
+    // setState(idx) {
+    //     this.state.index = idx;
+    // }
+
     setState(idx) {
-        this.state.index = idx;
+        this.state = idx;
     }
 
     setCurrentNum(num) {
@@ -217,10 +228,10 @@ class Calculator {
     }
 
     numberInput(kp) {
-        let state = this.getStateIndex();
+        let state = this.getState();
 
         // Stop looking for post-eval operator
-        if (state === 1) {
+        if (state === POSTEVAL) {
             this.resetLastOperator();
         }
 
@@ -239,10 +250,10 @@ class Calculator {
             console.log("currentNum: " + this.getCurrentNum());
             console.log("LastNum: " + this.getLastNum());
             
-            if (state === 0 || state == 1) {
-                state = 2;            
-            } else if (state == 3) {
-                state = 4;
+            if (state === START || state == POSTEVAL) {
+                state = ONEIN;            
+            } else if (state == POSTOP) {
+                state = READY;
             }
             
             this.setState(state);
@@ -252,27 +263,27 @@ class Calculator {
     handleOperator(kp) {
         const state = this.getState();
 
-        if (state === 'one' || state === 'nolast') {
+        if (state === ONEIN || state === POSTEVAL) {
             this.setOperator(kp);
-            if (state === 'one') {
+            if (state === POSTEVAL) {
                 this.resetLastOperator();
             }
             // Move current to last
-            if (state === 'nolast') {
+            if (state === ONEIN) {
                 this.setLastNum(this.getCurrentNum());
                 this.setCurrentNum('a');
             }
-            this.setState(3);
+            this.setState(POSTOP);
 
         // Just updating the operator
-        } else if (state === 'next') {
+        } else if (state === POSTOP) {
             this.setOperator(kp);
-        } else if (state === 'full') {
+        } else if (state === READY) {
             this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
             this.setOperator(kp);
             //this.resetOperator(this.getLastNum());  // Necessary?
             this.resetLastOperator();
-            this.setState(3);
+            this.setState(POSTOP);
 
         }
     }
@@ -280,20 +291,20 @@ class Calculator {
     equals() {
         const state = this.getState();
 
-        if (state === 'one') {
+        if (state === POSTEVAL) {
             if (this.getLastOperator() === '-' || this.getLastOperator() === '/') {
                 this.evaluate(this.getLastOpNum(), this.getLastNum(), this.getLastOperator());
             } else {
                 this.evaluate(this.getLastNum(), this.getLastOpNum(), this.getLastOperator());
             }
             
-        } else if (state === 'next') {
+        } else if (state === POSTOP) {
             this.evaluate(this.getLastNum(), this.getLastNum(), this.getOperator());
-            this.setState(1);
-        } else if (state === 'full') {
+            this.setState(POSTEVAL);
+        } else if (state === READY) {
             this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
             // Store c as lastOpNum, op as lastOperator ... but where?
-            this.setState(1);
+            this.setState(POSTEVAL);
         }
     }
 
@@ -308,7 +319,7 @@ class Calculator {
             this.division(l, c);
         }
 
-        if (this.getState() !== 'one' && this.getState() !== 'next') {
+        if (this.getState() !== POSTEVAL && this.getState() !== POSTOP) {
             this.resetOperator(this.getLastNum());
         } else {
             this.updateScreen(this.getLastNum());
@@ -336,16 +347,16 @@ class Calculator {
         let num;  // Will not get set on 'start'
         let next;
 
-        if (state === 'one' || state === 'next') {
+        if (state === POSTEVAL || state === POSTOP) {
             num = this.getLastNum();
-            next = 3;
-        } else if (state === 'nolast' || state === 'full') {
+            next = POSTOP;
+        } else if (state === ONEIN || state === READY) {
             num = this.getCurrentNum();
-            next = 1;
+            next = POSTEVAL;
         }
 
         if (num) {  // Skip if 'start'
-            if (state === 'full') {
+            if (state === READY) {
                 this.evaluate(Number(num) / 100, this.getLastNum(), this.getOperator());
             } else {
             this.setLastNum(Number(num) / 100);
@@ -359,13 +370,13 @@ class Calculator {
         const state = this.getState();
 
         // "I just want to switch sign of the number I'm inputting"
-        if (state === 'nolast' || state === 'full') {
+        if (state === ONEIN || state === READY) {
             this.setCurrentNum((-this.getCurrentNum()).toString());
         // "I want to invert my last answer, disregard any curr/prev operator pressed/remembered"
-        } else if (state === 'one' || state === 'next') {
+        } else if (state === POSTEVAL || state === POSTOP) {
             this.setLastNum((-this.getLastNum()).toString());
             this.resetOperator(this.getLastNum());
-            this.setState(3);  // Not 'one' because no lastOperation
+            this.setState(POSTOP);  // Not POSTEVAL because no lastOperation
         }
     }
 
@@ -375,7 +386,7 @@ class Calculator {
         this.setLastOpNum(this.getCurrentNum());
         this.setOperator('');
         this.setCurrentNum('a');
-        this.setState(1);
+        this.setState(POSTEVAL);
     }
 
     resetLastOperator() {
@@ -387,20 +398,20 @@ class Calculator {
         let state = this.getState();
         let string = this.getCurrentNum();
 
-        if (state === 'nolast' || state === 'full') {
+        if (state === ONEIN || state === READY) {
             string = string.slice(0,-1);
             // No more characters
             if (!string.length) {
-                if (state === 'nolast') {
-                    state = 0;
+                if (state === ONEIN) {
+                    state = START;
                     string = 'a';
                 } else {
-                    state = 3;
+                    state = POSTOP;
                     string = '0';
                 }
                 this.setState(state);
             }
-            this.setState(this.getStateIndex());
+            this.setState(this.getState());
             this.updateScreen(string === 'a' ? undefined : string);
             this.setCurrentNum(string);
         }
@@ -414,7 +425,7 @@ class Calculator {
             this.setOperator('');
             this.resetLastOperator();
             this.updateScreen();
-            this.setState(0);
+            this.setState(START);
         }
     }
 
@@ -422,10 +433,10 @@ class Calculator {
         console.log(displayText);
         if (displayText.length > 20) {
             displayText = 'Overflow!';
-            this.setState(0);
+            this.setState(START);
         } else if (displayText === Infinity) {
             displayText = 'DIV/0!';
-            this.setState(0);
+            this.setState(START);
         // } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
         } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.') {
             // Don't lose '2.0' on your way to '2.02'
@@ -443,7 +454,7 @@ class Calculator {
         }
 
         // Remove trailing zeroes
-        if (displayText.includes('.') && this.getState() === 'one') {
+        if (displayText.includes('.') && this.getState() === POSTEVAL) {
             while (displayText[displayText.length - 1] == 0) {
                 displayText = displayText.substring(0,displayText.length - 1);
             }
