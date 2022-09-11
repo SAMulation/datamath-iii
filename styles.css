@@ -11,7 +11,7 @@
 
   body {
     background: #e4e4e4;
-    padding: 5px;
+    /* padding: 5px; */
     height: 100vh;
     margin: 0;
   
@@ -41,8 +41,8 @@
     grid-column: 1 / -1;
     background: black;
     color: white;
-    position: sticky;
-    top: 0;
+    /* position: sticky;
+    top: 0; */
   }
 
   .page-subheader {
