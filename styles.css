@@ -25,7 +25,7 @@
     box-shadow: 0 0 3px rgba(black, 0.33);
   
     display: grid;
-    grid-template-columns: minmax(10px, 3fr) minmax(10px, 1fr);
+    grid-template-columns: minmax(10px, 3fr) minmax(10px, 2fr);
     grid-template-rows: min-content 1fr min-content min-content;
     gap: 1px;
   }
@@ -109,6 +109,31 @@ p.subhead {
     font-size: 1em;
 }
 
+p.hide {
+    display: none;
+}
+
+.info {
+    padding: 10px;
+}
+
+.info > *{
+    padding-bottom: 10px;
+}
+
+.helpRow {
+    display: flex;
+    justify-content: space-between;
+}
+
+/* .key {
+    text-align: left;
+}
+
+.exp {
+    text-align: right;
+} */
+
 .calc1, .calc2 {
     background-color: rgb(185, 172, 135);
     margin: 5% auto;
@@ -124,9 +149,9 @@ p.subhead {
 
 .screen {
     background-color: rgb(40, 10, 15);
-    margin: auto 17px 10px 17px;
+    margin: 0px 0px 10px 0px;
     padding: 15px;
-    font-size: 30px;
+    font-size: 2em;
     font-weight: bold;
     color: rgb(148, 3, 3);
     text-align: right;
@@ -136,7 +161,7 @@ p.subhead {
     display: flex;
     justify-content: space-between;
     color: white;
-    margin: auto 17px;
+    margin: 17px 0px;
 }
 
 .buttonArea {
@@ -179,6 +204,13 @@ p.subhead {
     font-size: 2em;
     background-color: rgb(240, 240, 240);
     border-radius: 5px;
+}
+
+.small {
+    font-size: 1em;
+    padding: 0px 10px;
+    border: black solid 1px;
+    /* height: min-content; */
 }
 
 .button:hover {
@@ -236,7 +268,7 @@ p.subhead {
 
     .page-wrap > * {
         grid-column: 1 / -1 !important;
-        grid-row: auto !important;
+        grid-row: auto;
     }
     
     .page-sidebar {
@@ -249,5 +281,19 @@ p.subhead {
 
     p.subhead {
         font-size: .5em;
+    }
+
+    .page-sidebar.visible {
+        display: block;
+        grid-row: 2 / 3;
+    }
+    
+    .page-subheader.hide {
+        display: none;
+    }
+
+    p.hide {
+        display: block;
+        margin-top: 20px;
     }
   }
