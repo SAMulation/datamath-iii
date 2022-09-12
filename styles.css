@@ -33,7 +33,13 @@ body {
     display: grid;
     grid-template-columns: minmax(10px, 3fr) minmax(10px, 2fr);
     grid-template-rows: min-content 1fr min-content min-content;
-    gap: 1px;
+    /* gap: 1px; */
+    grid-template-areas: 
+        "header   header"
+        "calc     helpinfo"
+        "odininfo odininfo"
+        "footer   footer"    
+    ;
 }
 
 .page-wrap > * {
@@ -42,7 +48,8 @@ body {
 }
     
 .page-header {
-    grid-column: 1 / -1;
+    /* grid-column: 1 / -1; */
+    grid-area: header;
     background: black;
     color: white;
     /* position: sticky;
@@ -51,30 +58,35 @@ body {
 
 .page-subheader {
     display: none;
-    grid-column: 1 / -1;
+    /* grid-column: 1 / -1; */
+    grid-area: subheader;
     background: rgb(185, 172, 135);;
 }
   
 .page-main {
-    grid-row: span 1;
-    grid-column: 1 / 2;
+    /* grid-row: span 1;
+    grid-column: 1 / 2; */
+    grid-area: calc;
     background: white;
 }
 
 .page-sidebar {
-    grid-column: 2 / 3;
-    grid-row: span 1;
+    /* grid-column: 2 / 3;
+    grid-row: span 1; */
+    grid-area: helpinfo;
     background: rgb(185, 172, 135);;
 }
 
 
 .page-subfooter {
-    grid-column: 1 / -1;
+    /* grid-column: 1 / -1; */
+    grid-area: odininfo;
     background: darkgray;
 }
 
 .page-footer {
-    grid-column: 1 / -1;
+    /* grid-column: 1 / -1; */
+    grid-area: footer;
     background: black;
     color: white;
 }
@@ -239,12 +251,20 @@ p.hide {
     .page-wrap {
         grid-template-columns: 100%;
         grid-template-rows: auto;
+        grid-template-areas: 
+            "header"
+            "subheader"
+            "helpinfo"
+            "calc"
+            "odininfo"
+            "footer"    
+        ;
     }
 
-    .page-wrap > * {
-        grid-column: 1 / -1 !important;
+    /* .page-wrap > * {
+        grid-column: 1 / -1;
         grid-row: auto;
-    }
+    } */
     
     /* General Small Screen Styles */
     h1 {
@@ -258,7 +278,7 @@ p.hide {
     /* Showing/Hiding Help Section */
     .page-sidebar.visible {
         display: block;
-        grid-row: 2 / 3;
+        /* grid-row: 2 / 3; */
     }
     
     .page-subheader.hide {
