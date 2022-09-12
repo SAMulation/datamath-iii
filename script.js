@@ -2,6 +2,7 @@
     // Variables
     [C] = currentNum, [L] = lastNum, [O] = operator, [LO] = lastOperation (which holds lo(perator) and ln(um))
         *  Variables either hold N(othing) or X (which is something)
+
     0: START = calc just opened (formerly - 0: 'start')
         vars state: [C] = N, [L] = N, [O] = N, [LO] = N
         actions: 0-9 (add first char to C) go to ONEIN, no operators b/c no # stored; =, (-): also do nothing
@@ -24,6 +25,7 @@
     unless START or POSTOP: +/- on C (else on L), BS on C (else N), % on C (else on L)
 */
 
+// Global variables
 const START = 0,
       ONEIN = 1,
       POSTOP = 2,
@@ -429,7 +431,7 @@ class Calculator {
         }
     }
 
-    updateScreen(displayText = "Mathematical!") {
+    updateScreen(displayText = "Math Time!") {
         console.log(displayText);
         if (displayText.length > 20) {
             displayText = 'Overflow!';

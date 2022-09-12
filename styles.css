@@ -4,7 +4,13 @@
     box-sizing: border-box;
     font-family: 'Share Tech Mono', sans-serif;
     user-select: none;
+    touch-action: none;
+    /* pointer-events: none; */
 }
+
+/* button, a {
+    pointer-events: auto;
+} */
 
 body {
     background: #e4e4e4;
