@@ -64,12 +64,17 @@ class Calculator {
 
         // was mousedown
         clear.addEventListener('pointerdown', event => {
+            event.preventDefault();
             mouseHoldTimeout = setTimeout(() => {
                 console.log("Clear");
                 this.clearScreen();
                 mouseHoldTimeout = false;
               }, 500);
         });
+
+        // clear.addEventListener('touchdown', event => {
+        //     event.preventDefault();
+        // });
 
         // was click
         clear.addEventListener('pointerup', event => {

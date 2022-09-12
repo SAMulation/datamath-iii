@@ -3,14 +3,16 @@
     padding: 0;
     box-sizing: border-box;
     font-family: 'Share Tech Mono', sans-serif;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: none;
+    /* touch-action: none; */
 }
 
-/* button {
-    touch-action: none;
-} */
+button {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    border: none;
+    color: black;
+}
 
 /* button, a {
     pointer-events: auto;
