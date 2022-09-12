@@ -285,8 +285,9 @@ class Calculator {
             }
             
         } else if (state === POSTOP) {
-            this.evaluate(this.getLastNum(), this.getLastNum(), this.getOperator());
-            this.setState(POSTEVAL);
+            this.setCurrentNum(this.getLastNum());
+            this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
+            this.resetOperator(this.getLastNum());
         } else if (state === READY) {
             this.evaluate(this.getCurrentNum(), this.getLastNum(), this.getOperator());
             // Store c as lastOpNum, op as lastOperator ... but where?
@@ -363,10 +364,10 @@ class Calculator {
 
         // "I just want to switch sign of the number I'm inputting"
         if (state === ONEIN || state === READY) {
-            this.setCurrentNum((-this.getCurrentNum()).toString());
+            this.setCurrentNum((-Number(this.getCurrentNum())).toString());
         // "I want to invert my last answer, disregard any curr/prev operator pressed/remembered"
         } else if (state === POSTEVAL || state === POSTOP) {
-            this.setLastNum((-this.getLastNum()).toString());
+            this.setLastNum(-this.getLastNum());
             this.resetOperator(this.getLastNum());
             this.setState(POSTOP);  // Not POSTEVAL because no lastOperation
         }
