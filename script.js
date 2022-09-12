@@ -127,17 +127,9 @@ class Calculator {
           }, true);
     }   
 
-    // getState() {
-    //     return this.state.options[this.state.index];
-    // }
-
     getState() {
         return this.state;
     }
-
-    // getStateIndex() {
-    //     return this.state.index;
-    // }
 
     getCurrentNum() {
         return this.currentNum;
@@ -158,10 +150,6 @@ class Calculator {
     getLastOpNum() {
         return this.lastOperation.num;
     }
-
-    // setState(idx) {
-    //     this.state.index = idx;
-    // }
 
     setState(idx) {
         this.state = idx;
@@ -200,7 +188,7 @@ class Calculator {
             // Don't add a decimal if it's already there
             if (!(this.getCurrentNum().includes('.'))) {
                 this.setCurrentNum((this.getCurrentNum() === 'a') ? '0.' : this.getCurrentNum() + ".");
-                this.updateScreen(this.getCurrentNum());
+                this.updateScreen(this.getCurrentNum()), 'show';
             }
         
         // Equals
@@ -243,12 +231,8 @@ class Calculator {
 
         // Protecting against leading zeroes
         if (!(this.getCurrentNum() === '0' && kp === '0')) {
-            // Prevents leading zeroes after backspace second number
-            //this.setCurrentNum(Number(this.getCurrentNum() + kp.toString()).toString());
-            //this.setCurrentNum((this.getCurrentNum()[this.getCurrentNum().length - 1] === "." || this.getCurrentNum()[this.getCurrentNum().length - 1] == 0) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
-            //this.setCurrentNum((this.getCurrentNum().includes('.')) ? this.getCurrentNum() + kp.toString() : Number(this.getCurrentNum() + kp.toString()).toString());
-            this.setCurrentNum(this.getCurrentNum() + kp.toString());
-            this.updateScreen(this.getCurrentNum());
+            this.setCurrentNum(this.getCurrentNum() + kp);
+            this.updateScreen(this.getCurrentNum(), 'show');
             console.log("currentNum: " + this.getCurrentNum());
             console.log("LastNum: " + this.getLastNum());
             
@@ -321,10 +305,16 @@ class Calculator {
             this.division(l, c);
         }
 
-        if (this.getState() !== POSTEVAL && this.getState() !== POSTOP) {
-            this.resetOperator(this.getLastNum());
+        // DIV/0 Protection
+        if (op === '/' && Number(c) === 0) {
+            this.clearScreen();
+            this.updateScreen('DIV/0!', 'show')
         } else {
-            this.updateScreen(this.getLastNum());
+            if (this.getState() !== POSTEVAL && this.getState() !== POSTOP) {
+                this.resetOperator(this.getLastNum());
+            } else {
+                this.updateScreen(this.getLastNum(), 'eval');
+            }
         }
     }
 
@@ -383,7 +373,7 @@ class Calculator {
     }
 
     resetOperator(n) {
-        this.updateScreen(n);
+        this.updateScreen(n, 'eval');
         this.setLastOperator(this.getOperator());
         this.setLastOpNum(this.getCurrentNum());
         this.setOperator('');
@@ -414,7 +404,7 @@ class Calculator {
                 this.setState(state);
             }
             this.setState(this.getState());
-            this.updateScreen(string === 'a' ? undefined : string);
+            this.updateScreen(string === 'a' ? undefined : string, 'show');
             this.setCurrentNum(string);
         }
     }
@@ -431,36 +421,42 @@ class Calculator {
         }
     }
 
-    updateScreen(displayText = "Math Time!") {
-        console.log(displayText);
-        if (displayText.length > 20) {
-            displayText = 'Overflow!';
-            this.setState(START);
-        } else if (displayText === Infinity) {
-            displayText = 'DIV/0!';
-            this.setState(START);
-        // } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
-        } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.') {
-            // Don't lose '2.0' on your way to '2.02'
-            if (!displayText.toString().includes('.0') && !(displayText[displayText.length - 1] === 0)) {
-                displayText = Math.floor(displayText * 10000000) / 10000000;
-                displayText = displayText.toString();
-            }
-        }
+    updateScreen(displayText = "Math Time!", view = 'show') {
+        // view:
+        //   'show' = Print string (but not if it's too long)
+        //   'eval' = Print number
 
-        displayText = displayText.toString();
-        console.log(displayText.length > 11);
-        if (displayText.length > 11) {
-            console.log('toolong')
-            displayText = displayText.substring(0,12);
-        }
+        // console.log(displayText);
+        // if (displayText.length > 20) {
+        //     displayText = 'Overflow!';
+        //     this.setState(START);
+        // } else if (displayText === Infinity) {
+        //     displayText = 'DIV/0!';
+        //     this.setState(START);
+        // // } else if (displayText.length > 10 && !isNaN(displayText) && displayText.toString().includes('.') && displayText[displayText.length - 1] !== '.') {
+        // } else if (!isNaN(displayText) && displayText[displayText.length - 1] !== '.') {
+        //     // Don't lose '2.0' on your way to '2.02'
+        //     if (!displayText.toString().includes('.0') && !(displayText[displayText.length - 1] === 0)) {
+        //         displayText = Math.floor(displayText * 10000000) / 10000000;
+        //         displayText = displayText.toString();
+        //     }
+        // }
 
-        // Remove trailing zeroes
-        if (displayText.includes('.') && this.getState() === POSTEVAL) {
-            while (displayText[displayText.length - 1] == 0) {
-                displayText = displayText.substring(0,displayText.length - 1);
-            }
-        }
+        // displayText = displayText.toString();
+        // console.log(displayText.length > 11);
+        // if (displayText.length > 11) {
+        //     console.log('toolong')
+        //     displayText = displayText.substring(0,12);
+        // }
+
+        // // Remove trailing zeroes
+        // if (displayText.includes('.') && this.getState() === POSTEVAL) {
+        //     while (displayText[displayText.length - 1] == 0) {
+        //         displayText = displayText.substring(0,displayText.length - 1);
+        //     }
+        // }
+
+
         // console.log(displayText);
         // if (displayText.length > 11) {
         //     console.log('toolong')
@@ -468,6 +464,18 @@ class Calculator {
         // if (displayText.toString().length > 11) {
         //     displayText = ((!isNan(displayText)) ? displayText.toString() : displayText).substring(0,12);
         // }
+        if (view === 'show' && displayText.length > 12) {
+            displayText = displayText.substring(0, 12);
+        }
+
+        if (view === 'eval') {
+            displayText = Number(displayText);
+            displayText = Math.floor(displayText * 10000000) / 10000000;
+            if (displayText.toString().length > 12) {
+                displayText = "Overflow!";
+            }
+        }
+
         this.rootElement.querySelector('.screen').textContent = displayText;
     }
 
