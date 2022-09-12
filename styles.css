@@ -4,8 +4,12 @@
     box-sizing: border-box;
     font-family: 'Share Tech Mono', sans-serif;
     user-select: none;
-    touch-action: none;
+    -webkit-user-select: none;
     /* pointer-events: none; */
+}
+
+button {
+    touch-action: none;
 }
 
 /* button, a {
