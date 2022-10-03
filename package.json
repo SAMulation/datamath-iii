@@ -1,0 +1,24 @@
+{
+  "name": "datamath-iii",
+  "version": "1.0.0",
+  "description": "calculator for odin project",
+  "main": "script.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SAMulation/datamath-iii.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SAMulation/datamath-iii/issues"
+  },
+  "homepage": "https://github.com/SAMulation/datamath-iii#readme",
+  "devDependencies": {
+    "@babel/preset-env": "^7.19.3",
+    "jest": "^29.1.2",
+    "jest-environment-jsdom": "^29.1.2"
+  }
+}
