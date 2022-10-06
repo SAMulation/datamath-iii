@@ -11,4 +11,5 @@ helps.forEach(help => {
 })
 
 const calculator1 = new Calculator(document.querySelector('.calc1'));
+window.calc1 = calculator1;
 // const calculator2 = new Calculator(document.querySelector('.calc2'));

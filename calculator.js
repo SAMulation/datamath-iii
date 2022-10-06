@@ -220,6 +220,7 @@ export default class Calculator {
         } else if (kp === 'C') {
             this.clearScreen();
         }
+        return true;
     }
 
     numberInput(kp) {
@@ -275,7 +276,6 @@ export default class Calculator {
             //this.resetOperator(this.getLastNum());  // Necessary?
             this.resetLastOperator();
             this.setState(POSTOP);
-
         }
     }
 
@@ -301,15 +301,20 @@ export default class Calculator {
     }
 
     evaluate(c, l, op) {
+        let answer;
+
         if (op === '+') {
-            this.addition(l, c);
+            answer = this.addition(l, c);
         } else if (op === '-') {
-            this.subtraction(l, c);
+            answer = this.subtraction(l, c);
         } else if (op === '*') {
-            this.multiplication(l, c);
+            answer = this.multiplication(l, c);
         } else {  // Division
-            this.division(l, c);
+            answer = this.division(l, c);
         }
+
+        // Set lastNum
+        this.setLastNum(answer);
 
         // DIV/0 Protection
         if (op === '/' && Number(c) === 0) {
@@ -322,23 +327,30 @@ export default class Calculator {
                 this.updateScreen(this.getLastNum(), 'eval');
             }
         }
+        return answer;
     }
 
     addition(l, c) {
-        this.setLastNum(Number(l) + Number(c));
-        return Number(l) + Number(c);
+        let answer = Number(l) + Number(c)
+
+        // Protect against floats
+        if (!Number.isSafeInteger(answer)) {
+            answer = Number((parseFloat(l) + parseFloat(c)).toFixed(10))
+        }
+        console.log(answer)
+        return answer
     }
 
     subtraction(l, c) {
-        this.setLastNum(Number(l) - Number(c));
+        return Number(l) - Number(c);
     }
 
     multiplication(l, c) {
-        this.setLastNum(Number(l) * Number(c));
+        return Number(l) * Number(c);
     }
 
     division(l, c) {
-        this.setLastNum(Number(l) / Number(c));
+        return Number(l) / Number(c);
     }
 
     percent() {
@@ -484,6 +496,7 @@ export default class Calculator {
         }
 
         this.rootElement.querySelector('.screen').textContent = displayText;
+        return displayText;
     }
 
 }

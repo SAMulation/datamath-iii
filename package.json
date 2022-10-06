@@ -4,7 +4,7 @@
   "description": "calculator for odin project",
   "main": "script.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest --watchAll"
   },
   "repository": {
     "type": "git",
