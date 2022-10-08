@@ -331,14 +331,13 @@ export default class Calculator {
     }
 
     addition(l, c) {
-        let answer = Number(l) + Number(c)
-
-        // Protect against floats
-        if (!Number.isSafeInteger(answer)) {
-            answer = Number((parseFloat(l) + parseFloat(c)).toFixed(10))
+        let answer;
+        if (!Number.isSafeInteger(l) || !Number.isSafeInteger(c)) {
+            answer = Number((l + parseFloat(c)).toFixed(10))
+        } else {
+            answer = Number(l) + Number(c)
         }
-        console.log(answer)
-        return answer
+        return answer;
     }
 
     subtraction(l, c) {
@@ -346,7 +345,13 @@ export default class Calculator {
     }
 
     multiplication(l, c) {
-        return Number(l) * Number(c);
+        let answer;
+        if (!Number.isSafeInteger(l) || !Number.isSafeInteger(c)) {
+            answer = Number((parseFloat(l) * parseFloat(c)).toFixed(10))
+        } else {
+            answer = Number(l) * Number(c)
+        }
+        return answer;
     }
 
     division(l, c) {

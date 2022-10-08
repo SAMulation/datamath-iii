@@ -4,7 +4,7 @@ const testCalc = new Calculator(document.querySelector('.calc1'));
 
 describe('mock cases', () => {
     it('should give all the right negative calls', () => {
-        testCalc.handleKeyPress('-');
+        testCalc.handleKeyPress('N');
         expect(testCalc.currentNum).toBe('a'); // Should do nothing
 
         testCalc.handleKeyPress('1');
@@ -35,7 +35,11 @@ describe('simple operators', () => {
     });
 
     it('should add .1 + .2 to equal .3', () => {
-        expect(testCalc.addition(0.1, 0.2, '+')).toBe(0.3);
+        expect(testCalc.addition('0.1', 0.2, '+')).toBe(0.3);
+    });
+
+    it('should multiply .1 * .2 to equal .02', () => {
+        expect(testCalc.multiplication(0.1, 0.2, '*')).toBe(0.02);
     });
       
     it('should subtract 3 - 1 to equal 2', () => {
@@ -58,8 +62,16 @@ describe('simple operators', () => {
         expect(testCalc.division(9, 0, '/')).toBe(Infinity);
     });
     
-    it('should divide 9 / 0 to be Infinity', () => {
+    it('dividing 0 by 0 to be Infinity', () => {
+        expect(testCalc.evaluate(0, 0, '/')).toBe(NaN);
+    });
+
+    it('dividing positive number by 0 to be Infinity', () => {
         expect(testCalc.evaluate(0, 9, '/')).toBe(Infinity);
+    });
+
+    it('dividing negative number by 0 to be Infinity', () => {
+        expect(testCalc.evaluate(0, -9, '/')).toBe(-Infinity);
     });
 });
 
